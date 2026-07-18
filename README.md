@@ -764,34 +764,6 @@ The following enhancements are planned:
 - Email Report Scheduler
 - Mobile Responsive Improvements
 
----
-
-# 🧪 Testing
-
-Before deployment, verify:
-
-- ✅ Login
-- ✅ Signup
-- ✅ Upload CSV
-- ✅ Upload Excel
-- ✅ Data Cleaning
-- ✅ Analytics Dashboard
-- ✅ Executive Dashboard
-- ✅ Enterprise AI
-- ✅ AI Dashboard Builder
-- ✅ AI SQL Assistant
-- ✅ AI Data Assistant
-- ✅ Forecasting
-- ✅ ML Studio
-- ✅ AutoML
-- ✅ Reporting Center
-- ✅ Workspace
-- ✅ Collaboration
-- ✅ PDF Export
-- ✅ PPT Export
-- ✅ Excel Export
-
----
 
 # 📚 Learning Outcomes
 
@@ -859,7 +831,7 @@ This platform can be used in:
 
 ## Aadvik Singh
 
-Electronics & Communication Engineering
+Electronics & Communication Engineer
 
 Government Engineering College, Jamui
 
