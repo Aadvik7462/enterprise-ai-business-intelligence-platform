@@ -118,7 +118,7 @@ Unlike traditional dashboard applications, this platform combines **Business Int
 
 <p align="center">
 
-<img src="screenshots/Enterprise AI BI Platform.png" width="95%">
+<img src="screenshots/Enterprise%20AI%20BI%20Platform.png" width="95%">
 
 </p>
 
@@ -128,7 +128,7 @@ Unlike traditional dashboard applications, this platform combines **Business Int
 
 <p align="center">
 
-<img src="screenshots/AI Data Assistant.png" width="95%">
+<img src="screenshots/AI%20Data%20Assistant.png" width="95%">
 
 </p>
 
@@ -138,7 +138,7 @@ Unlike traditional dashboard applications, this platform combines **Business Int
 
 <p align="center">
 
-<img src="screenshots/AI SQL Assistant.png" width="95%">
+<img src="screenshots/AI%20SQL%20Assistant.png" width="95%">
 
 </p>
 
@@ -148,7 +148,7 @@ Unlike traditional dashboard applications, this platform combines **Business Int
 
 <p align="center">
 
-<img src="screenshots/AutoML Studio.png" width="95%">
+<img src="screenshots/AutoML%20Studio.png" width="95%">
 
 </p>
 
@@ -178,7 +178,7 @@ Unlike traditional dashboard applications, this platform combines **Business Int
 
 <p align="center">
 
-<img src="screenshots/Advanced Analytics Center.png" width="95%">
+<img src="screenshots/Advanced%20Analytics%20Center.png" width="95%">
 
 </p>
 
@@ -670,25 +670,31 @@ Analytics Dashboard
 
 ## 📊 Reporting Center
 
-```markdown
-![Reporting Center](screenshots/Reporting Center.png)
-```
+<p align="center">
+
+<img src="screenshots/Reporting%20Center.png" width="95%" alt="Reporting Center">
+
+</p>
 
 ---
 
 ## 🏢 Workspace
 
-```markdown
-![Workspace](screenshots/Workspace.png)
-```
+<p align="center">
+
+<img src="screenshots/Workspace.png" width="95%" alt="Workspace">
+
+</p>
 
 ---
 
 ## 👥 Collaboration
 
-```markdown
-![Collaboration](screenshots/Collaboration.png)
-```
+<p align="center">
+
+<img src="screenshots/Collaboration.png" width="95%" alt="Collaboration">
+
+</p>
 
 ---
 
