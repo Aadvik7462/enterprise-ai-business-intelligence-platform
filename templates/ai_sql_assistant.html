@@ -1,0 +1,307 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        AI SQL Assistant | AI BI Platform
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='ui_system.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='ai_sql_assistant.css') }}"
+    >
+
+    <script
+        src="https://cdn.plot.ly/plotly-2.35.2.min.js"
+    ></script>
+</head>
+
+<body>
+<div class="dashboard-layout">
+
+    {% set active_page = "ai_sql" %}
+    {% include "sidebar.html" %}
+
+    <main class="main-content ai-sql-main">
+
+        <header class="ai-sql-hero">
+            <div>
+                <span class="ai-sql-label">
+                
+                </span>
+
+                <h1>AI SQL Assistant</h1>
+
+                <p>
+                    Ask questions in natural language or write safe
+                    SELECT queries for
+                    <strong>{{ filename }}</strong>.
+                </p>
+            </div>
+
+            <div class="ai-sql-hero-meta">
+                <div>
+                    <span>Dataset rows</span>
+                    <strong>{{ row_count }}</strong>
+                </div>
+
+                <div>
+                    <span>Table name</span>
+                    <strong>dataset</strong>
+                </div>
+            </div>
+        </header>
+
+        <section class="ai-sql-layout">
+
+            <aside class="ai-sql-schema-panel">
+                <div class="ai-sql-panel-heading">
+                    <span class="ai-sql-label">
+                        Schema
+                    </span>
+
+                    <h2>Dataset Columns</h2>
+
+                    <p>
+                        Use these exact names in manual SQL.
+                    </p>
+                </div>
+
+                <div class="ai-sql-schema-list">
+                    {% for column in schema %}
+                    <button
+                        type="button"
+                        class="ai-sql-schema-item"
+                        data-column="{{ column.name }}"
+                    >
+                        <span>{{ column.name }}</span>
+                        <small>{{ column.type }}</small>
+                    </button>
+                    {% endfor %}
+                </div>
+            </aside>
+
+            <div class="ai-sql-workspace">
+
+                <section class="ai-sql-card">
+                    <div class="ai-sql-card-header">
+                        <div>
+                            <span class="ai-sql-label">
+                                Natural Language
+                            </span>
+
+                            <h2>Ask the Dataset</h2>
+                        </div>
+
+                        <button
+                            type="button"
+                            id="clearAiSqlHistory"
+                            class="ai-sql-secondary-button"
+                        >
+                            Clear History
+                        </button>
+                    </div>
+
+                    <form id="aiSqlQuestionForm">
+                        <textarea
+                            id="aiSqlQuestion"
+                            rows="3"
+                            maxlength="500"
+                            placeholder="Example: Show total sales by region"
+                            required
+                        ></textarea>
+
+                        <div class="ai-sql-example-row">
+                            <button
+                                type="button"
+                                data-question="Show total sales by region"
+                            >
+                                Sales by region
+                            </button>
+
+                            <button
+                                type="button"
+                                data-question="Top 10 rows by profit"
+                            >
+                                Top profit
+                            </button>
+
+                            <button
+                                type="button"
+                                data-question="Average profit by category"
+                            >
+                                Average profit
+                            </button>
+
+                            <button
+                                type="button"
+                                data-question="Show monthly sales trend"
+                            >
+                                Monthly trend
+                            </button>
+                        </div>
+
+                        <button
+                            type="submit"
+                            id="aiSqlAskButton"
+                            class="ai-sql-primary-button"
+                        >
+                            Generate SQL and Run
+                        </button>
+                    </form>
+                </section>
+
+                <section class="ai-sql-card">
+                    <div class="ai-sql-card-header">
+                        <div>
+                            <span class="ai-sql-label">
+                                SQL Editor
+                            </span>
+
+                            <h2>Generated Query</h2>
+                        </div>
+
+                        <div class="ai-sql-header-actions">
+                            <button
+                                type="button"
+                                id="copyAiSqlButton"
+                                class="ai-sql-secondary-button"
+                            >
+                                Copy SQL
+                            </button>
+
+                            <button
+                                type="button"
+                                id="runAiSqlButton"
+                                class="ai-sql-secondary-button"
+                            >
+                                Run SQL
+                            </button>
+                        </div>
+                    </div>
+
+                    <textarea
+                        id="aiSqlEditor"
+                        rows="10"
+                        spellcheck="false"
+                        placeholder="SELECT * FROM dataset LIMIT 10"
+                    ></textarea>
+
+                    <p class="ai-sql-security-note">
+                        Only one SELECT or WITH query can run.
+                        Destructive SQL is blocked.
+                    </p>
+                </section>
+
+                <section
+                    id="aiSqlStatus"
+                    class="ai-sql-status"
+                    hidden
+                ></section>
+
+                <section
+                    id="aiSqlResultCard"
+                    class="ai-sql-card"
+                    hidden
+                >
+                    <div class="ai-sql-card-header">
+                        <div>
+                            <span class="ai-sql-label">
+                                Results
+                            </span>
+
+                            <h2>Query Output</h2>
+                        </div>
+
+                        <div class="ai-sql-header-actions">
+                            <button
+                                type="button"
+                                id="exportAiSqlCsv"
+                                class="ai-sql-secondary-button"
+                            >
+                                Export CSV
+                            </button>
+
+                            <button
+                                type="button"
+                                id="exportAiSqlExcel"
+                                class="ai-sql-secondary-button"
+                            >
+                                Export Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <div
+                        id="aiSqlChart"
+                        class="ai-sql-chart"
+                        hidden
+                    ></div>
+
+                    <div class="ai-sql-table-wrapper">
+                        <table id="aiSqlResultTable">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="ai-sql-card">
+                    <div class="ai-sql-card-header">
+                        <div>
+                            <span class="ai-sql-label">
+                                History
+                            </span>
+
+                            <h2>Recent Queries</h2>
+                        </div>
+                    </div>
+
+                    <div id="aiSqlHistory" class="ai-sql-history">
+                        <p class="ai-sql-empty-state">
+                            No SQL history yet.
+                        </p>
+                    </div>
+                </section>
+
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<script>
+window.aiSqlConfig = {
+    filename: {{ filename | tojson }},
+    askEndpoint: {{ url_for('ai_sql.ai_sql_ask') | tojson }},
+    executeEndpoint: {{ url_for('ai_sql.ai_sql_execute') | tojson }},
+    storageKey: "ai-sql-history-{{ filename | replace(' ', '-') | replace('.', '-') }}"
+};
+</script>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"
+></script>
+
+<script
+    src="{{ url_for('static', filename='ai_sql_assistant.js') }}"
+></script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Learning Studio | AI BI Platform</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='ui_system.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='ml_studio.css') }}">
+
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+
+<body>
+<div class="dashboard-layout">
+
+    {% set active_page = "ml_studio" %}
+    {% include "sidebar.html" %}
+
+    <main class="main-content ml-studio-main">
+
+        <header class="ml-studio-hero">
+            <div>
+                <span class="ml-studio-label"></span>
+                <h1>Machine Learning Studio</h1>
+                <p>
+                    Build classification, regression, and clustering models
+                    using <strong>{{ filename }}</strong>.
+                </p>
+            </div>
+
+            <div class="ml-studio-meta">
+                <div>
+                    <span>Rows</span>
+                    <strong>{{ row_count }}</strong>
+                </div>
+
+                <div>
+                    <span>Columns</span>
+                    <strong>{{ columns | length }}</strong>
+                </div>
+            </div>
+        </header>
+
+        <section class="ml-studio-layout">
+
+            <aside class="ml-studio-schema">
+                <div class="ml-studio-panel-header">
+                    <span class="ml-studio-label">Dataset Schema</span>
+                    <h2>Available Columns</h2>
+                </div>
+
+                <div class="ml-studio-column-list">
+                    {% for column in columns %}
+                    <article class="ml-studio-column">
+                        <div>
+                            <strong>{{ column.name }}</strong>
+                            <small>{{ column.dtype }}</small>
+                        </div>
+
+                        <span>{{ column.unique }} unique</span>
+                    </article>
+                    {% endfor %}
+                </div>
+            </aside>
+
+            <div class="ml-studio-workspace">
+
+                <section class="ml-studio-card">
+                    <div class="ml-studio-card-header">
+                        <div>
+                            <span class="ml-studio-label">Model Setup</span>
+                            <h2>Configure Training</h2>
+                        </div>
+                    </div>
+
+                    <form id="mlStudioForm">
+                        <div class="ml-studio-form-grid">
+
+                            <div class="ml-studio-field">
+                                <label for="mlTaskType">Task Type</label>
+                                <select id="mlTaskType">
+                                    <option value="auto">Auto Detect</option>
+                                    <option value="classification">Classification</option>
+                                    <option value="regression">Regression</option>
+                                    <option value="clustering">Clustering</option>
+                                </select>
+                            </div>
+
+                            <div class="ml-studio-field">
+                                <label for="mlTargetColumn">Target Column</label>
+                                <select id="mlTargetColumn">
+                                    <option value="">Select target</option>
+                                    {% for column in columns %}
+                                    <option value="{{ column.name }}">{{ column.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="ml-studio-field">
+                                <label for="mlModelName">Model</label>
+                                <select id="mlModelName">
+                                    <option value="random_forest">Random Forest</option>
+                                    <option value="logistic_regression">Logistic Regression</option>
+                                    <option value="linear_regression">Linear Regression</option>
+                                </select>
+                            </div>
+
+                            <div class="ml-studio-field">
+                                <label for="mlTestSize">Test Size</label>
+                                <select id="mlTestSize">
+                                    <option value="0.2">20%</option>
+                                    <option value="0.25">25%</option>
+                                    <option value="0.3">30%</option>
+                                </select>
+                            </div>
+
+                            <div class="ml-studio-field">
+                                <label for="mlClusterCount">Cluster Count</label>
+                                <input id="mlClusterCount" type="number" min="2" max="10" value="4">
+                            </div>
+
+                        </div>
+
+                        <button type="submit" id="mlTrainButton" class="ml-studio-primary-button">
+                            Train Model
+                        </button>
+                    </form>
+                </section>
+
+                <section id="mlStudioStatus" class="ml-studio-status" hidden></section>
+
+                <section id="mlStudioResults" class="ml-studio-results" hidden>
+
+                    <div class="ml-studio-result-header">
+                        <div>
+                            <span class="ml-studio-label">Training Complete</span>
+                            <h2 id="mlStudioResultTitle">Model Results</h2>
+                        </div>
+
+                        <a id="mlDownloadModel" class="ml-studio-download-button" href="#" hidden>
+                            Download Model
+                        </a>
+                    </div>
+
+                    <div id="mlMetricsGrid" class="ml-studio-metrics-grid"></div>
+
+                    <div class="ml-studio-two-column">
+                        <article class="ml-studio-card">
+                            <h3>Model Visualization</h3>
+                            <div id="mlStudioChart" class="ml-studio-chart"></div>
+                        </article>
+
+                        <article class="ml-studio-card">
+                            <h3>Feature Importance</h3>
+                            <div id="mlFeatureImportance" class="ml-feature-list"></div>
+                        </article>
+                    </div>
+
+                    <article class="ml-studio-card">
+                        <h3>Prediction or Cluster Preview</h3>
+
+                        <div class="ml-studio-table-wrapper">
+                            <table id="mlPreviewTable">
+                                <thead></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </article>
+
+                </section>
+
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<script>
+window.mlStudioConfig = {
+    filename: {{ filename | tojson }},
+    trainEndpoint: {{ url_for('ml_studio.ml_studio_train') | tojson }}
+};
+</script>
+
+<script src="{{ url_for('static', filename='ml_studio.js') }}"></script>
+</body>
+</html>

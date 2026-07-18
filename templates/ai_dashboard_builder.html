@@ -1,0 +1,211 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        AI Dashboard Builder | AI BI Platform
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='ui_system.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='ai_dashboard_builder.css') }}"
+    >
+
+    <script
+        src="https://cdn.plot.ly/plotly-2.35.2.min.js"
+    ></script>
+</head>
+
+<body>
+<div class="dashboard-layout">
+
+    {% set active_page = "ai_dashboard_builder" %}
+    {% include "sidebar.html" %}
+
+    <main class="main-content ai-builder-main">
+
+        <header class="ai-builder-hero">
+            <div>
+                <span class="ai-builder-label">
+                    Phase 3.1
+                </span>
+
+                <h1>
+                    AI Dashboard Builder
+                </h1>
+
+                <p>
+                    A complete dashboard was generated automatically
+                    from <strong>{{ filename }}</strong>.
+                </p>
+            </div>
+
+            <div class="ai-builder-actions">
+                <button
+                    type="button"
+                    onclick="window.location.reload()"
+                >
+                    Regenerate Dashboard
+                </button>
+
+                <a
+                    href="{{ url_for('executive.executive_dashboard', filename=filename) }}"
+                >
+                    Open Executive Dashboard
+                </a>
+            </div>
+        </header>
+
+        <section class="ai-builder-summary">
+            <div>
+                <span>Rows</span>
+                <strong>{{ dashboard.dataset.rows }}</strong>
+            </div>
+
+            <div>
+                <span>Columns</span>
+                <strong>{{ dashboard.dataset.columns }}</strong>
+            </div>
+
+            <div>
+                <span>Missing values</span>
+                <strong>{{ dashboard.dataset.missing_values }}</strong>
+            </div>
+
+            <div>
+                <span>Duplicate rows</span>
+                <strong>{{ dashboard.dataset.duplicate_rows }}</strong>
+            </div>
+        </section>
+
+        <section class="ai-generated-kpis">
+            {% for card in dashboard.kpis %}
+            <article class="ai-generated-kpi-card">
+                <div class="ai-generated-kpi-icon">
+                    {{ card.icon }}
+                </div>
+
+                <span>{{ card.title }}</span>
+
+                <strong
+                    data-value="{{ card.value }}"
+                    data-format="{{ card.format }}"
+                    class="ai-dashboard-kpi-value"
+                >
+                    {{ card.value }}
+                </strong>
+
+                <small>{{ card.source }}</small>
+            </article>
+            {% endfor %}
+        </section>
+
+        <section class="ai-builder-section">
+            <div class="ai-builder-section-header">
+                <div>
+                    <span>AI Generated</span>
+                    <h2>Dashboard Visualizations</h2>
+                </div>
+
+                <p>
+                    Plotly charts selected from the dataset structure.
+                </p>
+            </div>
+
+            <div class="ai-generated-chart-grid">
+                {% for chart in dashboard.charts %}
+                <article class="ai-generated-chart-card">
+                    <div>
+                        <h3>{{ chart.title }}</h3>
+                        <p>{{ chart.description }}</p>
+                    </div>
+
+                    <div
+                        id="aiGeneratedChart{{ loop.index }}"
+                        class="ai-generated-chart"
+                    ></div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="ai-builder-two-column">
+            <article class="ai-builder-insights">
+                <span class="ai-builder-label">
+                    AI Insights
+                </span>
+
+                <h2>Automatic Findings</h2>
+
+                {% for insight in dashboard.insights %}
+                <div class="ai-builder-insight-item">
+                    <span>✓</span>
+                    <p>{{ insight }}</p>
+                </div>
+                {% endfor %}
+            </article>
+
+            <article class="ai-builder-preview">
+                <span class="ai-builder-label">
+                    Dataset Preview
+                </span>
+
+                <h2>First 10 Rows</h2>
+
+                <div class="ai-builder-table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                {% for column in dashboard.preview.columns %}
+                                <th>{{ column }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for row in dashboard.preview.rows %}
+                            <tr>
+                                {% for column in dashboard.preview.columns %}
+                                <td>
+                                    {{ row.get(column, "") }}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+        </section>
+
+    </main>
+</div>
+
+<script>
+window.aiDashboardBuilderData = {
+    charts: {{ dashboard.charts | tojson }}
+};
+</script>
+
+<script
+    src="{{ url_for('static', filename='ai_dashboard_builder.js') }}"
+></script>
+</body>
+</html>

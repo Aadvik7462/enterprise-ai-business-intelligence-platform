@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Executive Dashboard | AI BI Platform</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='ui_system.css') }}"
+>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Plotly -->
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='ai_chat_v2_1.css') }}">
+</head>
+
+<body>
+
+<div class="dashboard-layout">
+
+<!-- ================= REUSABLE SIDEBAR ================= -->
+{% set active_page = "executive" %}
+{% include "sidebar.html" %}
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main class="main-content premium-main">
+
+        <!-- ================= EXECUTIVE HEADER ================= -->
+        <header class="executive-header">
+
+            <div class="hero-left">
+
+                <p class="breadcrumb">
+                    Home / Executive Dashboard
+                </p>
+
+                <h1>
+                    Business Intelligence Executive Dashboard
+                </h1>
+
+                <p class="hero-desc">
+                    Dataset: <strong>{{ filename }}</strong> •
+                    {{ stats.rows }} Records •
+                    {{ stats.columns }} Columns •
+                    {{ stats.quality_score }}% Quality
+                </p>
+
+            </div>
+
+            <div class="hero-right">
+<button
+    type="button"
+    id="openSaveDashboardButton"
+    class="hero-btn"
+>
+    💾 Save Dashboard
+</button>
+
+<a
+    href="{{ url_for('enterprise_ai_page.enterprise_ai_page', filename=filename) }}"
+    class="hero-btn enterprise-ai-header-btn"
+>
+    🧠 Enterprise AI
+</a>
+                <button
+                    type="button"
+                    class="hero-btn secondary"
+                    onclick="window.location.reload()"
+                >
+                    🔄 Refresh
+                </button>
+
+                <button
+                    type="button"
+                    class="hero-btn secondary"
+                    onclick="shareDashboard()"
+                >
+                    📤 Share
+                </button>
+<a href="{{ url_for('export.export_center', filename=filename) }}"
+   class="action-btn export-center-btn">
+    <span class="btn-icon">📤</span>
+    <span>Open Export Center</span>
+</a>
+                <a
+                    href="{{ url_for('export.export_pdf', filename=filename) }}"
+                    class="hero-btn"
+                >
+                    📄 Export PDF
+                </a>
+
+                <a
+                    href="{{ url_for('export.export_ppt', filename=filename) }}"
+                    class="hero-btn"
+                >
+                    📑 Export PPT
+                </a>
+                <a
+                    href="{{ url_for('export.export_package', filename=filename) }}"
+                    class="hero-btn package-btn"
+                >
+                    📦 Download Package
+                </a>
+                <a
+    href="{{ url_for('export.export_professional_pdf', filename=filename) }}"
+    class="hero-btn professional-pdf-btn"
+>
+    📄 Professional PDF
+</a>
+<a
+    href="{{ url_for('export.export_professional_ppt', filename=filename) }}"
+    class="hero-btn professional-ppt-btn"
+>
+    📊 Professional PPT
+</a>
+<a href="{{ url_for('export.export_professional_excel', filename=filename) }}"
+   class="action-btn excel-btn">
+    <span class="btn-icon">📗</span>
+    <span>Professional Excel Report</span>
+</a>
+            </div>
+
+        </header>
+
+        <!-- ================= KPI CARDS ================= -->
+        <section class="kpi-pro-grid">
+
+            <div class="kpi-pro-card">
+
+                <div class="kpi-pro-top">
+                    <span class="kpi-pro-icon blue">📊</span>
+                    <span class="trend-up">Live</span>
+                </div>
+
+                <h3>Total Records</h3>
+
+                <h2
+                    class="counter"
+                    data-target="{{ stats.rows }}"
+                >
+                    0
+                </h2>
+
+                <p>Rows available for analysis</p>
+
+                <div class="kpi-footer">
+                    <span class="trend-up">Available</span>
+                    <small>Updated now</small>
+                </div>
+
+            </div>
+
+            <div class="kpi-pro-card">
+
+                <div class="kpi-pro-top">
+                    <span class="kpi-pro-icon purple">🧩</span>
+                    <span class="trend-neutral">Stable</span>
+                </div>
+
+                <h3>Total Columns</h3>
+
+                <h2
+                    class="counter"
+                    data-target="{{ stats.columns }}"
+                >
+                    0
+                </h2>
+
+                <p>Features detected in dataset</p>
+
+                <div class="kpi-footer">
+                    <span class="trend-neutral">Current</span>
+                    <small>Updated now</small>
+                </div>
+
+            </div>
+
+            <div class="kpi-pro-card">
+
+                <div class="kpi-pro-top">
+                    <span class="kpi-pro-icon red">⚠️</span>
+
+                    {% if stats.missing_values == 0 %}
+                        <span class="trend-up">Clean</span>
+                    {% else %}
+                        <span class="trend-down">Needs Check</span>
+                    {% endif %}
+                </div>
+
+                <h3>Missing Values</h3>
+
+                <h2
+                    class="counter"
+                    data-target="{{ stats.missing_values }}"
+                >
+                    0
+                </h2>
+
+                <p>Null values detected</p>
+
+                <div class="kpi-footer">
+                    {% if stats.missing_values == 0 %}
+                        <span class="trend-up">No issues</span>
+                    {% else %}
+                        <span class="trend-down">Review</span>
+                    {% endif %}
+
+                    <small>Updated now</small>
+                </div>
+
+            </div>
+
+            <div class="kpi-pro-card">
+
+                <div class="kpi-pro-top">
+                    <span class="kpi-pro-icon green">✅</span>
+
+                    {% if stats.quality_score >= 90 %}
+                        <span class="trend-up">Excellent</span>
+                    {% elif stats.quality_score >= 75 %}
+                        <span class="trend-neutral">Good</span>
+                    {% else %}
+                        <span class="trend-down">Needs Work</span>
+                    {% endif %}
+                </div>
+
+                <h3>Quality Score</h3>
+
+                <h2>
+                    <span
+                        class="counter"
+                        data-target="{{ stats.quality_score }}"
+                    >
+                        0
+                    </span>%
+                </h2>
+
+                <p>Overall dataset health</p>
+
+                <div class="mini-progress">
+                    <div style="width: {{ stats.quality_score }}%;"></div>
+                </div>
+
+                <div class="kpi-footer">
+                    <span class="trend-up">Health</span>
+                    <small>Updated now</small>
+                </div>
+
+            </div>
+
+            <div class="kpi-pro-card">
+
+                <div class="kpi-pro-top">
+                    <span class="kpi-pro-icon orange">🔁</span>
+
+                    {% if stats.duplicate_rows == 0 %}
+                        <span class="trend-up">Clear</span>
+                    {% else %}
+                        <span class="trend-neutral">Duplicate Scan</span>
+                    {% endif %}
+                </div>
+
+                <h3>Duplicate Rows</h3>
+
+                <h2
+                    class="counter"
+                    data-target="{{ stats.duplicate_rows }}"
+                >
+                    0
+                </h2>
+
+                <p>Repeated records found</p>
+
+                <div class="kpi-footer">
+                    <span class="trend-neutral">Scanned</span>
+                    <small>Updated now</small>
+                </div>
+
+            </div>
+
+            <div class="kpi-pro-card">
+
+                <div class="kpi-pro-top">
+                    <span class="kpi-pro-icon teal">💾</span>
+                    <span class="trend-neutral">Memory</span>
+                </div>
+
+                <h3>Memory Usage</h3>
+
+                <h2>
+                    <span
+                        class="counter"
+                        data-target="{{ stats.memory_usage }}"
+                    >
+                        0
+                    </span>
+                    MB
+                </h2>
+
+                <p>Dataset memory footprint</p>
+
+                <div class="kpi-footer">
+                    <span class="trend-neutral">Current</span>
+                    <small>Updated now</small>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ================= BUSINESS HEALTH ================= -->
+        <section class="business-health-section">
+
+            <div class="health-left">
+
+                <h2>Business Health Score</h2>
+
+                <p>
+                    Overall dataset readiness based on quality score,
+                    missing values, duplicate rows, and completeness.
+                </p>
+
+                <div class="health-status">
+
+                    {% if stats.quality_score >= 90 %}
+
+                        <span class="health-badge excellent">
+                            Excellent
+                        </span>
+
+                        <strong>
+                            Ready for business analysis and reporting.
+                        </strong>
+
+                    {% elif stats.quality_score >= 75 %}
+
+                        <span class="health-badge good">
+                            Good
+                        </span>
+
+                        <strong>
+                            Usable dataset, but minor cleaning is recommended.
+                        </strong>
+
+                    {% else %}
+
+                        <span class="health-badge poor">
+                            Needs Cleaning
+                        </span>
+
+                        <strong>
+                            Clean the dataset before reliable analysis.
+                        </strong>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <div class="health-right">
+
+                <div
+                    class="health-circle"
+                    style="--score: {{ stats.quality_score }};"
+                >
+
+                    <div class="health-inner">
+
+                        <strong>
+                            <span
+                                class="counter"
+                                data-target="{{ stats.quality_score }}"
+                            >
+                                0
+                            </span>%
+                        </strong>
+
+                        <small>Health Score</small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ================= AI RECOMMENDATIONS ================= -->
+        <section class="ai-recommendation-section">
+
+            <div class="recommendation-header">
+
+                <div>
+                    <h2>🤖 AI Recommendation Center</h2>
+
+                    <p>
+                        Automatic recommendations generated from your dataset.
+                    </p>
+                </div>
+
+                <span class="summary-badge">
+                    AI
+                </span>
+
+            </div>
+
+            <div class="recommendation-grid">
+
+                {% for rec in recommendations %}
+
+                    <div class="recommendation-card {{ rec.type }}">
+
+                        <h3>{{ rec.title }}</h3>
+
+                        <p>{{ rec.message }}</p>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+        <!-- ================= EXECUTIVE AI REPORT ================= -->
+<section class="executive-ai-report-section">
+
+    <div class="ai-report-header">
+        <div>
+            <span class="copilot-label">Executive AI Report</span>
+            <h2>Automated Business Report</h2>
+            <p>
+                A structured executive overview generated from the uploaded dataset.
+            </p>
+        </div>
+
+        <span class="summary-badge">AI Generated</span>
+    </div>
+
+    <div class="ai-report-summary">
+        <h3>Executive Summary</h3>
+        <p>{{ executive_report.summary }}</p>
+    </div>
+
+    <div class="ai-report-grid">
+
+        <div class="ai-report-card findings-card">
+            <h3>📊 Key Findings</h3>
+
+            {% for item in executive_report.findings %}
+            <div class="ai-report-item">
+                <span>✓</span>
+                <p>{{ item }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="ai-report-card risks-card">
+            <h3>⚠️ Business Risks</h3>
+
+            {% for item in executive_report.risks %}
+            <div class="ai-report-item">
+                <span>!</span>
+                <p>{{ item }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="ai-report-card recommendations-card">
+            <h3>💡 Recommended Actions</h3>
+
+            {% for item in executive_report.recommendations %}
+            <div class="ai-report-item">
+                <span>→</span>
+                <p>{{ item }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="ai-report-conclusion">
+        <h3>Executive Conclusion</h3>
+        <p>{{ executive_report.conclusion }}</p>
+    </div>
+
+</section>
+        {% include 'partials/ai_assistant_v2_1.html' %}
+
+        <!-- ================= SUMMARY AND ACTION CENTER ================= -->
+        <section class="executive-two-column">
+            <!-- Executive Summary -->
+            <div class="exec-card executive-summary">
+
+                <div class="summary-header">
+
+                    <div>
+                        <h2>Executive Summary</h2>
+
+                        <p>
+                            Automatically generated business overview
+                        </p>
+                    </div>
+
+                    <span class="summary-badge">
+                        AI
+                    </span>
+
+                </div>
+
+                <div class="summary-metrics">
+
+                    <div class="summary-item">
+                        <strong>{{ stats.rows }}</strong>
+                        <span>Rows</span>
+                    </div>
+
+                    <div class="summary-item">
+                        <strong>{{ stats.columns }}</strong>
+                        <span>Columns</span>
+                    </div>
+
+                    <div class="summary-item">
+                        <strong>{{ stats.quality_score }}%</strong>
+                        <span>Quality</span>
+                    </div>
+
+                </div>
+
+                <div class="summary-insights">
+
+                    {% for insight in insights[:3] %}
+
+                        <div class="summary-line">
+
+                            <span>✔</span>
+
+                            <p>{{ insight }}</p>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            <!-- Action Center -->
+            <div class="exec-card action-center">
+
+                <h2>⚡ Action Center</h2>
+
+                <p class="muted-text">
+                    Generate reports and manage the current dashboard.
+                </p>
+
+                <div class="action-grid">
+
+                    <a
+                        href="{{ url_for('export.export_pdf', filename=filename) }}"
+                        class="action-btn blue"
+                    >
+                        📄 Export PDF
+                    </a>
+
+                    <a
+                        href="{{ url_for('export.export_ppt', filename=filename) }}"
+                        class="action-btn purple"
+                    >
+                        📑 Export PPT
+                    </a>
+
+                    <a
+                        href="{{ url_for('export.export_package', filename=filename) }}"
+                        class="action-btn package"
+                    >
+                        📦 Export All
+                    </a>
+<a
+    href="{{ url_for('advanced_analytics_page.advanced_analytics_page', filename=filename) }}"
+>
+    📉 Advanced Analytics
+</a>
+                    <button
+                        type="button"
+                        class="action-btn orange"
+                    >
+                        🤖 AI Report
+                    </button>
+
+                    <button
+                        type="button"
+                        class="action-btn teal"
+                        onclick="window.location.reload()"
+                    >
+                        🔄 Refresh
+                    </button>
+
+                    <button
+                        type="button"
+                        class="action-btn dark"
+                        onclick="shareDashboard()"
+                    >
+                        📤 Share
+                    </button>
+
+                </div>
+
+                {% if cleaning_report %}
+
+                    <div class="clean-mini-grid">
+
+                        <div>
+                            <strong>
+                                {{ cleaning_report.rows_removed }}
+                            </strong>
+
+                            <span>Rows Removed</span>
+                        </div>
+
+                        <div>
+                            <strong>
+                                {{ cleaning_report.missing_fixed }}
+                            </strong>
+
+                            <span>Missing Fixed</span>
+                        </div>
+
+                        <div>
+                            <strong>
+                                {{ cleaning_report.duplicates_removed }}
+                            </strong>
+
+                            <span>Duplicates Removed</span>
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+        <!-- ================= DATA PROFILE CHARTS ================= -->
+        <section class="executive-two-column">
+
+            <div class="exec-card chart-card">
+
+                <h2>Data Type Distribution</h2>
+
+                <canvas id="dtypeChart"></canvas>
+
+            </div>
+
+            <div class="exec-card chart-card">
+
+                <h2>Missing Values by Column</h2>
+
+                {% if chart_data.missing_labels %}
+
+                    <canvas id="missingChart"></canvas>
+
+                {% else %}
+
+                    <div class="empty-state">
+
+                        <h3>No Missing Values</h3>
+
+                        <p>Your dataset is clean.</p>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+        <!-- ================= PLOTLY DASHBOARD ================= -->
+        <section class="plotly-dashboard-section">
+
+            <div class="plotly-section-header">
+
+                <div>
+                    <h2>Interactive Plotly Dashboard</h2>
+
+                    <p>
+                        Zoom, pan, hover, export, and explore your
+                        business charts interactively.
+                    </p>
+                </div>
+
+                <span class="summary-badge">
+                    Interactive
+                </span>
+
+            </div>
+
+            <div class="plotly-grid">
+
+                {% for chart in plotly_charts %}
+
+                    <div class="plotly-card">
+
+                        <div id="plotlyChart{{ loop.index }}"></div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+        <!-- ================= DATASET TABLE ================= -->
+        <section class="table-section modern-table-section">
+
+            <div class="table-toolbar">
+
+                <div>
+                    <h2>Dataset Preview</h2>
+
+                    <p>
+                        First 10 rows of your dataset
+                    </p>
+                </div>
+
+                <input
+                    type="text"
+                    id="tableSearch"
+                    placeholder="Search table..."
+                    onkeyup="searchTable()"
+                >
+
+            </div>
+
+            <div class="table-wrapper modern-table-wrapper">
+                {{ preview_data | safe }}
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<!-- ================= JAVASCRIPT ================= -->
+<script>
+const dtypeLabels = {{ chart_data.dtype_labels | tojson }};
+const dtypeValues = {{ chart_data.dtype_values | tojson }};
+const missingLabels = {{ chart_data.missing_labels | tojson }};
+const missingValues = {{ chart_data.missing_values | tojson }};
+const plotlyCharts = {{ plotly_charts | tojson }};
+
+/* Data type chart */
+const dtypeCanvas = document.getElementById("dtypeChart");
+
+if (dtypeCanvas) {
+    new Chart(dtypeCanvas, {
+        type: "doughnut",
+        data: {
+            labels: dtypeLabels,
+            datasets: [{
+                data: dtypeValues
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+
+/* Missing values chart */
+const missingCanvas = document.getElementById("missingChart");
+
+if (missingCanvas && missingLabels.length > 0) {
+    new Chart(missingCanvas, {
+        type: "bar",
+        data: {
+            labels: missingLabels,
+            datasets: [{
+                label: "Missing Values",
+                data: missingValues
+            }]
+        },
+        options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+
+/* Plotly charts */
+plotlyCharts.forEach((chartJson, index) => {
+    try {
+        const chart = JSON.parse(chartJson);
+
+        Plotly.newPlot(
+            "plotlyChart" + (index + 1),
+            chart.data,
+            chart.layout,
+            {
+                responsive: true,
+                displaylogo: false
+            }
+        );
+    } catch (error) {
+        console.error(
+            "Plotly chart failed to load:",
+            error
+        );
+    }
+});
+
+/* Dataset table search */
+function searchTable() {
+    const input = document.getElementById("tableSearch");
+    const table = document.querySelector(".data-table");
+
+    if (!input || !table) {
+        return;
+    }
+
+    const filter = input.value.toLowerCase();
+    const rows = table.getElementsByTagName("tr");
+
+    for (let i = 1; i < rows.length; i++) {
+        const rowText = rows[i].innerText.toLowerCase();
+
+        rows[i].style.display = rowText.includes(filter)
+            ? ""
+            : "none";
+    }
+}
+
+/* Animated KPI counters */
+document.querySelectorAll(".counter").forEach(counter => {
+    const target = parseFloat(counter.dataset.target);
+    let current = 0;
+
+    if (Number.isNaN(target) || target === 0) {
+        counter.innerText = "0";
+        return;
+    }
+
+    const increment = target / 60;
+
+    function updateCounter() {
+        current += increment;
+
+        if (current < target) {
+            counter.innerText = Number.isInteger(target)
+                ? Math.floor(current)
+                : current.toFixed(1);
+
+            requestAnimationFrame(updateCounter);
+        } else {
+            counter.innerText = Number.isInteger(target)
+                ? target
+                : target.toFixed(1);
+        }
+    }
+
+    updateCounter();
+});
+
+/* Share dashboard */
+async function shareDashboard() {
+    const shareData = {
+        title: "AI BI Executive Dashboard",
+        text: "View this Business Intelligence Executive Dashboard.",
+        url: window.location.href
+    };
+
+    try {
+        if (navigator.share) {
+            await navigator.share(shareData);
+        } else if (navigator.clipboard) {
+            await navigator.clipboard.writeText(window.location.href);
+            alert("Dashboard link copied to clipboard.");
+        } else {
+            alert(window.location.href);
+        }
+    } catch (error) {
+        console.error("Dashboard sharing failed:", error);
+    }
+}
+
+</script>
+<!-- ================= SAVE DASHBOARD MODAL ================= -->
+<div
+    id="saveDashboardModal"
+    class="save-dashboard-modal"
+    aria-hidden="true"
+>
+
+    <div class="save-dashboard-backdrop"></div>
+
+    <section class="save-dashboard-modal-card">
+
+        <div class="save-dashboard-modal-header">
+
+            <div>
+                <span class="copilot-label">
+                    Workspace
+                </span>
+
+                <h2>Save Dashboard</h2>
+
+                <p>
+                    Save this dashboard inside one of your workspaces.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                id="closeSaveDashboardButton"
+                class="save-dashboard-close-btn"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <div
+            id="saveDashboardMessage"
+            class="save-dashboard-message"
+            style="display: none;"
+        ></div>
+
+        <form id="saveDashboardForm">
+
+            <div class="save-dashboard-field">
+                <label for="saveDashboardWorkspace">
+                    Workspace
+                </label>
+
+                <select
+                    id="saveDashboardWorkspace"
+                    required
+                >
+                    <option value="">
+                        Select Workspace
+                    </option>
+                </select>
+            </div>
+
+            <div class="save-dashboard-field">
+                <label for="saveDashboardName">
+                    Dashboard Name
+                </label>
+
+                <input
+                    type="text"
+                    id="saveDashboardName"
+                    maxlength="100"
+                    required
+                >
+            </div>
+
+            <div class="save-dashboard-field">
+                <label for="saveDashboardDescription">
+                    Description
+                </label>
+
+                <textarea
+                    id="saveDashboardDescription"
+                    rows="4"
+                    maxlength="300"
+                    placeholder="Optional dashboard description"
+                ></textarea>
+            </div>
+
+            <div class="save-dashboard-modal-actions">
+
+                <button
+                    type="button"
+                    id="cancelSaveDashboardButton"
+                    class="save-dashboard-secondary-btn"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    id="submitSaveDashboardButton"
+                    class="save-dashboard-primary-btn"
+                >
+                    Save Dashboard
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+<script>
+window.dashboardSaveConfig = {
+    filename: {{ filename | tojson }},
+    dashboardType: "executive",
+    defaultName:
+        "Executive Dashboard - {{ filename }}"
+};
+</script>
+
+<script
+    src="{{ url_for('static', filename='dashboard_save.js') }}"
+></script>
+
+
+
+</body>
+</html>

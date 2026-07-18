@@ -1,0 +1,370 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>AutoML Studio | AI BI Platform</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='ui_system.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='automl_studio.css') }}"
+    >
+
+    <script
+        src="https://cdn.plot.ly/plotly-2.35.2.min.js"
+    ></script>
+</head>
+
+<body>
+<div class="dashboard-layout">
+
+    {% set active_page = "automl" %}
+    {% include "sidebar.html" %}
+
+    <main class="main-content automl-main">
+
+        <header class="automl-hero">
+            <div>
+                <span class="automl-eyebrow">
+                    
+                </span>
+
+                <h1>AutoML Studio</h1>
+
+                <p>
+                    Train multiple machine-learning models,
+                    compare them automatically, and download
+                    the best-performing model.
+                </p>
+            </div>
+
+            <div class="automl-dataset-summary">
+                <div>
+                    <span>Dataset</span>
+                    <strong>{{ filename }}</strong>
+                </div>
+
+                <div>
+                    <span>Rows</span>
+                    <strong>{{ row_count }}</strong>
+                </div>
+
+                <div>
+                    <span>Columns</span>
+                    <strong>{{ columns | length }}</strong>
+                </div>
+            </div>
+        </header>
+
+        <section class="automl-grid">
+
+            <aside class="automl-schema-panel">
+                <div class="automl-panel-header">
+                    <span class="automl-eyebrow">
+                        Data Profile
+                    </span>
+
+                    <h2>Dataset Columns</h2>
+                </div>
+
+                <div class="automl-schema-list">
+                    {% for column in columns %}
+                    <article class="automl-schema-row">
+                        <div>
+                            <strong>{{ column.name }}</strong>
+                            <small>{{ column.dtype }}</small>
+                        </div>
+
+                        <div class="automl-schema-meta">
+                            <span>{{ column.unique }} unique</span>
+                            <span>{{ column.missing }} missing</span>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+            </aside>
+
+            <div class="automl-workspace">
+
+                <section class="automl-card">
+                    <div class="automl-card-header">
+                        <div>
+                            <span class="automl-eyebrow">
+                                AutoML Configuration
+                            </span>
+
+                            <h2>Choose Training Settings</h2>
+                        </div>
+                    </div>
+
+                    <form id="automlForm">
+                        <div class="automl-form-grid">
+
+                            <div class="automl-field">
+                                <label for="automlTargetColumn">
+                                    Target Column
+                                </label>
+
+                                <select id="automlTargetColumn">
+                                    <option value="">
+                                        Select target column
+                                    </option>
+
+                                    {% for column in columns %}
+                                    <option value="{{ column.name }}">
+                                        {{ column.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="automl-field">
+                                <label for="automlTestSize">
+                                    Test Size
+                                </label>
+
+                                <select id="automlTestSize">
+                                    <option value="0.2">20%</option>
+                                    <option value="0.25">25%</option>
+                                    <option value="0.3">30%</option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <div class="automl-model-list">
+                            <h3>Models included automatically</h3>
+
+                            <div class="automl-model-chips">
+                                <span>Logistic / Linear Regression</span>
+                                <span>Decision Tree</span>
+                                <span>Random Forest</span>
+                                <span>Extra Trees</span>
+                                <span>Gradient Boosting</span>
+                                <span>Ridge Regression</span>
+                            </div>
+                        </div>
+
+                        <button
+                            id="automlTrainButton"
+                            class="automl-primary-button"
+                            type="submit"
+                        >
+                            Run AutoML
+                        </button>
+                    </form>
+                </section>
+
+                <section
+                    id="automlProgressCard"
+                    class="automl-progress-card"
+                    hidden
+                >
+                    <div class="automl-progress-header">
+                        <div>
+                            <strong id="automlProgressTitle">
+                                Preparing AutoML pipeline
+                            </strong>
+
+                            <span id="automlProgressMessage">
+                                Profiling dataset and configuring models.
+                            </span>
+                        </div>
+
+                        <strong id="automlProgressPercent">
+                            0%
+                        </strong>
+                    </div>
+
+                    <div class="automl-progress-track">
+                        <div id="automlProgressBar"></div>
+                    </div>
+                </section>
+
+                <section
+                    id="automlStatus"
+                    class="automl-status"
+                    hidden
+                ></section>
+
+                <section
+                    id="automlResults"
+                    class="automl-results"
+                    hidden
+                >
+
+                    <div class="automl-result-header">
+                        <div>
+                            <span class="automl-eyebrow">
+                                AutoML Complete
+                            </span>
+
+                            <h2 id="automlResultTitle">
+                                Model Leaderboard
+                            </h2>
+                        </div>
+
+                        <div class="automl-download-group">
+                            <a
+                                id="automlDownloadModel"
+                                class="automl-download-button"
+                                href="#"
+                                hidden
+                            >
+                                Download Best Model
+                            </a>
+
+                            <a
+                                id="automlDownloadLeaderboard"
+                                class="automl-download-button secondary"
+                                href="#"
+                                hidden
+                            >
+                                Export Leaderboard
+                            </a>
+
+                            <a
+                                id="automlDownloadPredictions"
+                                class="automl-download-button secondary"
+                                href="#"
+                                hidden
+                            >
+                                Export Predictions
+                            </a>
+                        </div>
+                    </div>
+
+                    <section class="automl-best-model-card">
+                        <div>
+                            <span class="automl-eyebrow">
+                                Recommended Model
+                            </span>
+
+                            <h3 id="automlBestModelName">
+                                —
+                            </h3>
+
+                            <p id="automlBestModelReason">
+                                —
+                            </p>
+                        </div>
+
+                        <div
+                            id="automlBestMetrics"
+                            class="automl-best-metrics"
+                        ></div>
+                    </section>
+
+                    <section class="automl-card">
+                        <div class="automl-card-header">
+                            <div>
+                                <span class="automl-eyebrow">
+                                    Ranked Models
+                                </span>
+
+                                <h2>Leaderboard</h2>
+                            </div>
+                        </div>
+
+                        <div class="automl-table-wrapper">
+                            <table id="automlLeaderboardTable">
+                                <thead></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <div class="automl-two-column">
+
+                        <section class="automl-card">
+                            <div class="automl-card-header">
+                                <div>
+                                    <span class="automl-eyebrow">
+                                        Performance
+                                    </span>
+
+                                    <h2>Model Comparison</h2>
+                                </div>
+                            </div>
+
+                            <div
+                                id="automlLeaderboardChart"
+                                class="automl-chart"
+                            ></div>
+                        </section>
+
+                        <section class="automl-card">
+                            <div class="automl-card-header">
+                                <div>
+                                    <span class="automl-eyebrow">
+                                        Explainable AI
+                                    </span>
+
+                                    <h2>Feature Importance</h2>
+                                </div>
+                            </div>
+
+                            <div
+                                id="automlFeatureImportance"
+                                class="automl-feature-list"
+                            ></div>
+                        </section>
+
+                    </div>
+
+                    <section class="automl-card">
+                        <div class="automl-card-header">
+                            <div>
+                                <span class="automl-eyebrow">
+                                    Validation Output
+                                </span>
+
+                                <h2>Predictions Preview</h2>
+                            </div>
+                        </div>
+
+                        <div class="automl-table-wrapper">
+                            <table id="automlPreviewTable">
+                                <thead></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                </section>
+
+            </div>
+
+        </section>
+
+    </main>
+</div>
+
+<script>
+window.automlStudioConfig = {
+    filename: {{ filename | tojson }},
+    trainEndpoint: {{ url_for('automl.automl_train') | tojson }}
+};
+</script>
+
+<script
+    src="{{ url_for('static', filename='automl_studio.js') }}"
+></script>
+</body>
+</html>

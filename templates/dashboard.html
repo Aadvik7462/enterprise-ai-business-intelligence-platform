@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Dashboard | AI BI Platform
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='ui_system.css') }}"
+>
+</head>
+
+<body>
+
+<div class="dashboard-layout">
+
+    <!-- ================= REUSABLE SIDEBAR ================= -->
+    {% set active_page = "dashboard" %}
+    {% include "sidebar.html" %}
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main class="main-content premium-main">
+
+        <!-- ================= TOP BAR ================= -->
+        <header class="premium-topbar">
+
+            <div>
+                <p class="breadcrumb">
+                    Home / Dashboard
+                </p>
+
+                <h1>
+                    Business Intelligence Dashboard
+                </h1>
+
+                <p>
+                    Welcome back,
+                    <strong>{{ user }}</strong>
+                </p>
+            </div>
+
+            <div class="profile-chip">
+
+                <span>👤</span>
+
+                <div>
+                    <strong>Admin User</strong>
+                    <small>{{ user }}</small>
+                </div>
+
+            </div>
+
+        </header>
+
+        <!-- ================= FLASH MESSAGES ================= -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% if messages %}
+
+                {% for category, message in messages %}
+
+                    <div class="alert {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+        {% endwith %}
+
+        <!-- ================= HERO SECTION ================= -->
+        <section class="hero-panel">
+
+            <div>
+
+                <span class="hero-badge">
+                    AI Powered BI Platform
+                </span>
+
+                <h2>
+                    Turn raw data into business insights
+                </h2>
+
+                <p>
+                    Upload CSV or Excel datasets, generate KPIs,
+                    dashboards, AI insights, forecasts, and
+                    exportable reports from one modern workspace.
+                </p>
+
+                <a
+                    href="#upload-section"
+                    class="primary-action"
+                >
+                    Start Analysis
+                </a>
+
+            </div>
+
+            <div class="hero-visual">
+
+                <div class="mini-card one">
+                    <strong>98%</strong>
+                    <span>Data Quality</span>
+                </div>
+
+                <div class="mini-card two">
+                    <strong>AI</strong>
+                    <span>Insights</span>
+                </div>
+
+                <div class="mini-card three">
+                    <strong>+27%</strong>
+                    <span>Forecast</span>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ================= KPI CARDS ================= -->
+        <section class="premium-kpi-grid">
+
+            <div class="premium-kpi-card">
+
+                <div class="kpi-icon blue">
+                    📊
+                </div>
+
+                <h3>Total Dashboards</h3>
+
+                <h2>
+                    {{ dashboard_count | default(0) }}
+                </h2>
+
+                <p>
+                    Saved dashboards in your workspaces
+                </p>
+
+            </div>
+
+            <div class="premium-kpi-card">
+
+                <div class="kpi-icon green">
+                    📁
+                </div>
+
+                <h3>Uploaded Datasets</h3>
+
+                <h2>
+                    {{ uploaded_count }}
+                </h2>
+
+                <p>
+                    Total uploaded files
+                </p>
+
+            </div>
+
+            <div class="premium-kpi-card">
+
+                <div class="kpi-icon purple">
+                    🤖
+                </div>
+
+                <h3>AI Insights</h3>
+
+                <h2>
+                    {{ insight_count | default(0) }}
+                </h2>
+
+                <p>
+                    Insights generated after upload
+                </p>
+
+            </div>
+
+            <div class="premium-kpi-card">
+
+                <div class="kpi-icon orange">
+                    📄
+                </div>
+
+                <h3>Reports Exported</h3>
+
+                <h2>
+                    {{ export_count | default(0) }}
+                </h2>
+
+                <p>
+                    Exported executive reports
+                </p>
+
+            </div>
+
+        </section>
+
+        <!-- ================= QUICK ACCESS ================= -->
+        <section class="dashboard-quick-access">
+
+            <div class="quick-access-header">
+
+                <div>
+                    <span class="section-label">
+                        Platform Modules
+                    </span>
+
+                    <h2>
+                        Quick Access
+                    </h2>
+
+                    <p>
+                        Open your workspaces, collaboration center,
+                        or upload a new business dataset.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="quick-access-grid">
+
+                <a
+                    href="{{ url_for('workspace_page.workspace_page') }}"
+                    class="quick-access-card"
+                >
+                    <span class="quick-access-icon">
+                        🗂️
+                    </span>
+
+                    <div>
+                        <h3>Workspaces</h3>
+
+                        <p>
+                            Organize and manage saved dashboards,
+                            forecasts, and analysis.
+                        </p>
+                    </div>
+
+                    <strong>Open →</strong>
+                </a>
+
+                <a
+                    href="{{ url_for('collaboration_page.collaboration_center') }}"
+                    class="quick-access-card"
+                >
+                    <span class="quick-access-icon">
+                        👥
+                    </span>
+
+                    <div>
+                        <h3>Collaboration</h3>
+
+                        <p>
+                            Manage invitations, notifications,
+                            shared dashboards, and audit activity.
+                        </p>
+                    </div>
+
+                    <strong>Open →</strong>
+                </a>
+
+                <a
+                    href="#upload-section"
+                    class="quick-access-card"
+                >
+                    <span class="quick-access-icon">
+                        📤
+                    </span>
+
+                    <div>
+                        <h3>Upload Dataset</h3>
+
+                        <p>
+                            Upload CSV or Excel data and start
+                            automated business analysis.
+                        </p>
+                    </div>
+
+                    <strong>Start →</strong>
+                </a>
+
+            </div>
+
+        </section>
+
+        <!-- ================= UPLOAD SECTION ================= -->
+        <section
+            class="upload-panel"
+            id="upload-section"
+        >
+
+            <div class="upload-content">
+
+                <span class="section-label">
+                    Dataset Upload
+                </span>
+
+                <h2>
+                    Upload your business dataset
+                </h2>
+
+                <p>
+                    Support for CSV, XLS, and XLSX files. After upload,
+                    the system automatically previews, profiles, cleans,
+                    analyzes, and forecasts your data.
+                </p>
+
+                <form
+                    action="{{ url_for('data.upload_file') }}"
+                    method="POST"
+                    enctype="multipart/form-data"
+                    class="premium-upload-form"
+                    id="uploadForm"
+                >
+
+                    <label
+                        class="advanced-drop-zone"
+                        id="dropZone"
+                    >
+
+                        <input
+                            type="file"
+                            name="dataset"
+                            id="datasetInput"
+                            accept=".csv,.xlsx,.xls"
+                            required
+                            hidden
+                        >
+
+                        <div class="drop-icon">
+                            ☁️
+                        </div>
+
+                        <h3>
+                            Drop your dataset here
+                        </h3>
+
+                        <p>
+                            or click to browse your files
+                        </p>
+
+                        <span>
+                            CSV • XLS • XLSX supported
+                        </span>
+
+                    </label>
+
+                    <div
+                        class="selected-file-box"
+                        id="selectedFileBox"
+                    >
+
+                        <div>
+
+                            <strong id="fileName">
+                                No file selected
+                            </strong>
+
+                            <p id="fileSize">
+                                Choose a dataset to continue
+                            </p>
+
+                        </div>
+
+                        <span id="fileStatus">
+                            Waiting
+                        </span>
+
+                    </div>
+
+                    <div
+                        class="upload-progress-box"
+                        id="progressBox"
+                    >
+
+                        <div class="progress-header">
+
+                            <span>
+                                Uploading dataset...
+                            </span>
+
+                            <strong id="progressPercent">
+                                0%
+                            </strong>
+
+                        </div>
+
+                        <div class="upload-progress-bar">
+
+                            <div
+                                class="upload-progress-fill"
+                                id="progressFill"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="upload-analyze-btn"
+                        id="uploadBtn"
+                        disabled
+                    >
+                        Upload & Analyze
+                    </button>
+
+                </form>
+
+            </div>
+
+            <!-- ================= WORKFLOW CARD ================= -->
+            <div class="workflow-card">
+
+                <h3>
+                    Analysis Workflow
+                </h3>
+
+                <div class="workflow-step">
+                    <span>1</span>
+                    <p>Upload Dataset</p>
+                </div>
+
+                <div class="workflow-step">
+                    <span>2</span>
+                    <p>Generate Data Profile</p>
+                </div>
+
+                <div class="workflow-step">
+                    <span>3</span>
+                    <p>AI Insights & Forecast</p>
+                </div>
+
+                <div class="workflow-step">
+                    <span>4</span>
+                    <p>Dashboard & Reports</p>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<!-- ================= UPLOAD JAVASCRIPT ================= -->
+<script>
+const dropZone =
+    document.getElementById(
+        "dropZone"
+    );
+
+const fileInput =
+    document.getElementById(
+        "datasetInput"
+    );
+
+const fileName =
+    document.getElementById(
+        "fileName"
+    );
+
+const fileSize =
+    document.getElementById(
+        "fileSize"
+    );
+
+const fileStatus =
+    document.getElementById(
+        "fileStatus"
+    );
+
+const uploadBtn =
+    document.getElementById(
+        "uploadBtn"
+    );
+
+const uploadForm =
+    document.getElementById(
+        "uploadForm"
+    );
+
+const progressBox =
+    document.getElementById(
+        "progressBox"
+    );
+
+const progressFill =
+    document.getElementById(
+        "progressFill"
+    );
+
+const progressPercent =
+    document.getElementById(
+        "progressPercent"
+    );
+
+
+function formatFileSize(bytes) {
+    if (bytes < 1024) {
+        return bytes + " B";
+    }
+
+    if (bytes < 1024 * 1024) {
+        return (
+            bytes / 1024
+        ).toFixed(2) + " KB";
+    }
+
+    return (
+        bytes / (
+            1024 * 1024
+        )
+    ).toFixed(2) + " MB";
+}
+
+
+function validateFile(file) {
+    const allowedExtensions = [
+        "csv",
+        "xlsx",
+        "xls"
+    ];
+
+    const extension =
+        file.name
+            .split(".")
+            .pop()
+            .toLowerCase();
+
+    return allowedExtensions.includes(
+        extension
+    );
+}
+
+
+function updateSelectedFile(file) {
+    if (!validateFile(file)) {
+        fileName.textContent =
+            "Invalid file type";
+
+        fileSize.textContent =
+            "Please upload CSV, XLS, or XLSX only";
+
+        fileStatus.textContent =
+            "Invalid";
+
+        fileStatus.className =
+            "invalid-status";
+
+        uploadBtn.disabled =
+            true;
+
+        return;
+    }
+
+    fileName.textContent =
+        "📄 " + file.name;
+
+    fileSize.textContent =
+        formatFileSize(
+            file.size
+        );
+
+    fileStatus.textContent =
+        "Ready";
+
+    fileStatus.className =
+        "ready-status";
+
+    uploadBtn.disabled =
+        false;
+}
+
+
+dropZone.addEventListener(
+    "click",
+    () => {
+        fileInput.click();
+    }
+);
+
+
+fileInput.addEventListener(
+    "change",
+    () => {
+        if (
+            fileInput.files.length > 0
+        ) {
+            updateSelectedFile(
+                fileInput.files[0]
+            );
+        }
+    }
+);
+
+
+dropZone.addEventListener(
+    "dragover",
+    event => {
+        event.preventDefault();
+
+        dropZone.classList.add(
+            "drag-active"
+        );
+    }
+);
+
+
+dropZone.addEventListener(
+    "dragleave",
+    () => {
+        dropZone.classList.remove(
+            "drag-active"
+        );
+    }
+);
+
+
+dropZone.addEventListener(
+    "drop",
+    event => {
+        event.preventDefault();
+
+        dropZone.classList.remove(
+            "drag-active"
+        );
+
+        if (
+            event.dataTransfer
+                .files
+                .length > 0
+        ) {
+            fileInput.files =
+                event.dataTransfer.files;
+
+            updateSelectedFile(
+                event.dataTransfer
+                    .files[0]
+            );
+        }
+    }
+);
+
+
+uploadForm.addEventListener(
+    "submit",
+    () => {
+        progressBox.style.display =
+            "block";
+
+        uploadBtn.disabled =
+            true;
+
+        uploadBtn.textContent =
+            "Uploading...";
+
+        let progress = 0;
+
+        const interval =
+            window.setInterval(
+                () => {
+                    progress += 10;
+
+                    progressFill.style.width =
+                        progress + "%";
+
+                    progressPercent.textContent =
+                        progress + "%";
+
+                    if (progress >= 100) {
+                        window.clearInterval(
+                            interval
+                        );
+
+                        uploadBtn.textContent =
+                            "Processing Dataset...";
+                    }
+                },
+                120
+            );
+    }
+);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login | AI BI Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-body">
+
+<div class="login-container">
+    <div class="login-card">
+        <h1>AI BI Platform</h1>
+        <p>Login to your analytics workspace</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <label>Email</label>
+            <input type="email" name="email" placeholder="Enter email" required>
+
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Enter password" required>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <div class="demo-login">
+            <p><strong>Demo Login</strong></p>
+            <p>Email: admin@gmail.com</p>
+            <p>Password: admin123</p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

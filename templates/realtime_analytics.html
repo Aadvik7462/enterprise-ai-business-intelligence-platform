@@ -1,0 +1,15 @@
+
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Real-Time Analytics</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='ui_system.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='phase4_enterprise.css') }}">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body><div class="dashboard-layout">{% set active_page = "enterprise_ai" %}{% include "sidebar.html" %}
+<main class="main-content phase4-main">
+<section class="phase4-hero compact"><div><span class="phase4-label">Phase 4.5</span><h1>Real-Time Analytics</h1><p>Auto-refreshing monitoring for <strong>{{ filename }}</strong>.</p></div><button id="phase4RefreshButton" class="phase4-action">Refresh Now</button></section>
+<div id="phase4RealtimeKpis" class="phase4-kpi-grid">{% for kpi in snapshot.kpis %}<article class="phase4-kpi"><span>{{ kpi.title }}</span><strong>{{ kpi.value }}</strong><small>{{ kpi.subtitle }}</small></article>{% endfor %}</div>
+<section class="phase4-card"><h2>Active Alerts</h2><div id="phase4RealtimeAlerts" class="phase4-insight-list">{% for alert in snapshot.alerts %}<article class="phase4-insight {{ alert.severity }}"><strong>{{ alert.title }}</strong><p>{{ alert.message }}</p></article>{% endfor %}</div></section>
+</main></div>
+<script>window.phase4RealtimeConfig={endpoint:{{ url_for('phase4.realtime_snapshot_api', filename=filename)|tojson }}};</script>
+<script src="{{ url_for('static', filename='phase4_enterprise.js') }}"></script></body></html>

@@ -1,0 +1,17 @@
+
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>AI Report Writer</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='ui_system.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='phase4_enterprise.css') }}">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body><div class="dashboard-layout">{% set active_page = "enterprise_ai" %}{% include "sidebar.html" %}
+<main class="main-content phase4-main">
+<section class="phase4-hero compact"><div><span class="phase4-label">Phase 4.2</span><h1>AI Report Writer</h1><p>Executive report for <strong>{{ filename }}</strong>.</p></div></section>
+<section class="phase4-card"><span class="phase4-label">Executive Summary</span><h2>Dataset Overview</h2><p class="phase4-report-summary">{{ report.summary }}</p></section>
+<section class="phase4-kpi-grid">{% for kpi in report.kpis %}<article class="phase4-kpi"><span>{{ kpi.title }}</span><strong>{{ kpi.value }}</strong><small>{{ kpi.subtitle }}</small></article>{% endfor %}</section>
+<section class="phase4-two-column">
+<article class="phase4-card"><h2>Key Findings</h2><div class="phase4-insight-list">{% for insight in report.insights %}<article class="phase4-insight {{ insight.severity }}"><strong>{{ insight.title }}</strong><p>{{ insight.message }}</p></article>{% endfor %}</div></article>
+<article class="phase4-card"><h2>Recommendations</h2><ol class="phase4-recommendations">{% for recommendation in report.recommendations %}<li>{{ recommendation }}</li>{% endfor %}</ol></article>
+</section>
+</main></div></body></html>

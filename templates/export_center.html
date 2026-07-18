@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}
+Export Center
+{% endblock %}
+
+{% block content %}
+
+<div class="export-container">
+
+    <div class="export-header">
+        <h1>📤 Export Center</h1>
+
+        <p>
+            Download executive reports in multiple professional formats.
+        </p>
+    </div>
+
+
+    <div class="export-grid">
+
+        <!-- PDF -->
+
+        <div class="export-card pdf">
+
+            <div class="export-icon">
+                📄
+            </div>
+
+            <h2>Professional PDF</h2>
+
+            <p>
+                Executive business report with charts,
+                KPIs and AI insights.
+            </p>
+
+            <a href="{{ url_for('export.export_professional_pdf', filename=filename) }}"
+               class="download-btn pdf-btn">
+
+                Download PDF
+
+            </a>
+
+        </div>
+
+        <!-- PPT -->
+
+        <div class="export-card ppt">
+
+            <div class="export-icon">
+                📊
+            </div>
+
+            <h2>Professional PowerPoint</h2>
+
+            <p>
+                Boardroom-ready presentation generated
+                automatically.
+            </p>
+
+            <a href="{{ url_for('export.export_professional_ppt', filename=filename) }}"
+               class="download-btn ppt-btn">
+
+                Download PPT
+
+            </a>
+
+        </div>
+
+        <!-- Excel -->
+
+        <div class="export-card excel">
+
+            <div class="export-icon">
+                📗
+            </div>
+
+            <h2>Professional Excel</h2>
+
+            <p>
+                Full workbook including analytics,
+                statistics and recommendations.
+            </p>
+
+            <a href="{{ url_for('export.export_professional_excel', filename=filename) }}"
+               class="download-btn excel-btn">
+
+                Download Excel
+
+            </a>
+
+        </div>
+
+        <!-- ZIP -->
+
+        <div class="export-card zip">
+
+            <div class="export-icon">
+                📦
+            </div>
+
+            <h2>Complete Package</h2>
+
+            <p>
+                Download PDF + PPT + Excel in one ZIP file.
+            </p>
+
+            <a href="{{ url_for('export.export_package', filename=filename) }}"
+               class="download-btn zip-btn">
+
+                Download ZIP
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+<!-- ==========================================
+     Recent Export History
+========================================== -->
+
+<div class="history-section">
+
+    <h2>🕒 Recent Export History</h2>
+
+    {% if export_history %}
+
+    <table class="history-table">
+
+        <thead>
+
+            <tr>
+                <th>Dataset</th>
+                <th>Format</th>
+                <th>Generated</th>
+                <th>File</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+        {% for item in export_history %}
+
+            <tr>
+
+                <td>{{ item.dataset_name }}</td>
+
+                <td>
+                    {{ item.export_format }}
+                </td>
+
+                <td>
+                    {{ item.display_time }}
+                </td>
+
+                <td>
+                    {{ item.output_filename }}
+                </td>
+
+            </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    {% else %}
+
+        <p>No exports generated yet.</p>
+
+    {% endif %}
+
+</div>
+{% endblock %}

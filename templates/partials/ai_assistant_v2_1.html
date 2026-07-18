@@ -1,0 +1,197 @@
+
+<!-- AI DATA ASSISTANT VERSION 2.1 -->
+<button
+    type="button"
+    id="aiAssistantLauncher"
+    class="ai-assistant-launcher"
+    aria-label="Open AI Dataset Assistant"
+    aria-expanded="false"
+    aria-controls="aiAssistantPanel"
+>
+    <span class="ai-launcher-icon">✦</span>
+    <span class="ai-launcher-text">Ask AI</span>
+    <span class="ai-launcher-pulse" aria-hidden="true"></span>
+</button>
+
+<aside
+    id="aiAssistantPanel"
+    class="ai-assistant-panel"
+    aria-hidden="true"
+    aria-label="AI Dataset Assistant"
+>
+    <header class="ai-assistant-header">
+        <div class="ai-assistant-identity">
+            <div class="ai-assistant-avatar">AI</div>
+
+            <div>
+                <span class="ai-assistant-eyebrow">
+                    Dataset Copilot 2.1
+                </span>
+
+                <h2>AI Data Assistant</h2>
+
+                <p>
+                    Analyzing <strong>{{ filename }}</strong>
+                </p>
+            </div>
+        </div>
+
+        <div class="ai-assistant-header-actions">
+            <button
+                type="button"
+                id="aiAssistantExport"
+                class="ai-assistant-icon-btn"
+                title="Export chat"
+            >
+                ⇩
+            </button>
+
+            <button
+                type="button"
+                id="aiAssistantClear"
+                class="ai-assistant-icon-btn"
+                title="Clear chat"
+            >
+                ↺
+            </button>
+
+            <button
+                type="button"
+                id="aiAssistantMinimize"
+                class="ai-assistant-icon-btn"
+                title="Minimize"
+            >
+                —
+            </button>
+
+            <button
+                type="button"
+                id="aiAssistantClose"
+                class="ai-assistant-icon-btn"
+                title="Close"
+            >
+                ×
+            </button>
+        </div>
+    </header>
+
+    <section class="ai-assistant-body">
+        <div
+            id="aiAssistantMessages"
+            class="ai-assistant-messages"
+            role="log"
+            aria-live="polite"
+        >
+            <article class="ai-chat-message ai-chat-message-assistant">
+                <div class="ai-chat-avatar">AI</div>
+
+                <div class="ai-chat-bubble">
+                    <strong>AI Data Assistant</strong>
+
+                    <p>
+                        Ask for summaries, grouped charts, forecasts,
+                        heatmaps, KPI cards, recommendations, outliers,
+                        rankings, totals, averages, or correlations.
+                    </p>
+                </div>
+            </article>
+        </div>
+
+        <div class="ai-assistant-suggestions">
+            <button
+                type="button"
+                class="ai-prompt-chip"
+                data-ai-question="Summarize this dataset"
+            >
+                Summarize
+            </button>
+
+            <button
+                type="button"
+                class="ai-prompt-chip"
+                data-ai-question="Show executive KPIs"
+            >
+                KPIs
+            </button>
+
+            <button
+                type="button"
+                class="ai-prompt-chip"
+                data-ai-question="Generate executive recommendations"
+            >
+                Recommendations
+            </button>
+
+            <button
+                type="button"
+                class="ai-prompt-chip"
+                data-ai-question="Show correlation heatmap"
+            >
+                Heatmap
+            </button>
+
+            <button
+                type="button"
+                class="ai-prompt-chip"
+                data-ai-question="Forecast sales"
+            >
+                Forecast
+            </button>
+
+            <button
+                type="button"
+                class="ai-prompt-chip"
+                data-ai-question="Show outliers"
+            >
+                Outliers
+            </button>
+        </div>
+    </section>
+
+    <form
+        id="aiAssistantForm"
+        class="ai-assistant-composer"
+    >
+        <label
+            for="aiAssistantInput"
+            class="sr-only"
+        >
+            Ask a question about the dataset
+        </label>
+
+        <textarea
+            id="aiAssistantInput"
+            rows="1"
+            maxlength="500"
+            placeholder="Example: total sales by region"
+            autocomplete="off"
+            required
+        ></textarea>
+
+        <button
+            type="submit"
+            id="aiAssistantSend"
+            class="ai-assistant-send-btn"
+        >
+            <span>Send</span>
+            <span aria-hidden="true">➤</span>
+        </button>
+    </form>
+
+    <footer class="ai-assistant-footer">
+        <span class="ai-status-dot"></span>
+        Smart analytics • Version 2.1
+    </footer>
+</aside>
+
+<script>
+window.aiAssistantConfig = {
+    endpoint: {{ url_for('ai.ai_chat') | tojson }},
+    datasetName: {{ filename | tojson }},
+    storageKey: "ai-bi-v2-1-{{ filename | replace(' ', '-') | replace('.', '-') }}"
+};
+</script>
+
+<script
+    src="{{ url_for('static', filename='ai_chat_v2_1.js') }}"
+></script>

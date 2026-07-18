@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporting Center | AI BI Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='ui_system.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='reporting_center.css') }}">
+</head>
+<body>
+<div class="dashboard-layout">
+    {% include "sidebar.html" %}
+    <main class="main-content">
+        <header class="reporting-center-header">
+            <div>
+                <p class="breadcrumb">Dashboard / Reporting Center</p>
+                <h1>Enterprise Reporting Center</h1>
+                <p>Dataset: <strong>{{ filename }}</strong></p>
+            </div>
+            <a href="{{ url_for('reporting_center.download_report', filename=filename) }}" class="report-download-button">Download HTML Report</a>
+            {% include "global_topbar_actions.html" %}
+        </header>
+
+        <section class="reporting-kpi-grid">
+            <article><span>Total Rows</span><strong>{{ report.total_rows }}</strong></article>
+            <article><span>Total Columns</span><strong>{{ report.total_columns }}</strong></article>
+            <article><span>Missing Values</span><strong>{{ report.missing_values }}</strong></article>
+            <article><span>Duplicate Rows</span><strong>{{ report.duplicate_rows }}</strong></article>
+        </section>
+
+        <section class="reporting-table-card">
+            <h2>Numeric KPI Summary</h2>
+            <div class="reporting-table-wrapper">
+                <table>
+                    <thead><tr><th>Column</th><th>Total</th><th>Average</th><th>Minimum</th><th>Maximum</th></tr></thead>
+                    <tbody>
+                        {% for item in report.numeric_summaries %}
+                            <tr><td>{{ item.column }}</td><td>{{ item.total }}</td><td>{{ item.average }}</td><td>{{ item.minimum }}</td><td>{{ item.maximum }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+{% include "ui_overlays.html" %}
+<script src="{{ url_for('static', filename='ui_system.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Analytics Dashboard | AI BI Platform
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='ui_system.css') }}"
+>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="dashboard-layout">
+
+    <!-- ================= REUSABLE SIDEBAR ================= -->
+{% set active_page = "analytics" %}
+{% include "sidebar.html" %}
+    <!-- ================= MAIN CONTENT ================= -->
+    <main class="main-content">
+
+        <!-- ================= HEADER ================= -->
+        <header class="topbar preview-topbar">
+
+            <div>
+                <p class="breadcrumb">
+                    Dashboard / Analytics
+                </p>
+
+                <h1>
+                    Automatic Analytics Dashboard
+                </h1>
+
+                <p>
+                    File:
+                    <strong>{{ filename }}</strong>
+                </p>
+            </div>
+
+<div class="topbar-actions">
+
+    <button
+        type="button"
+        id="openSaveDashboardButton"
+        class="save-dashboard-trigger-btn"
+    >
+        💾 Save Dashboard
+    </button>
+
+    <a
+        href="{{ url_for('enterprise_ai_page.enterprise_ai_page', filename=filename) }}"
+        class="save-dashboard-trigger-btn"
+    >
+        🧠 Enterprise AI
+    </a>
+
+    <a
+        href="{{ url_for('data.preview_dataset', filename=filename) }}"
+        class="back-btn"
+    >
+        Back to Preview
+    </a>
+<a
+    href="{{ url_for('advanced_analytics_page.advanced_analytics_page', filename=filename) }}"
+>
+    📉 Advanced Analytics
+</a>
+<a
+    href="{{ url_for('export.export_professional_pdf', filename=filename) }}"
+    class="export-pdf-button"
+>
+    📄 Professional PDF
+</a>
+</div>
+
+        </header>
+
+        <!-- ================= KPI CARDS ================= -->
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <span>📊</span>
+                <h3>Total Rows</h3>
+                <h2>{{ stats.rows }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <span>🧩</span>
+                <h3>Total Columns</h3>
+                <h2>{{ stats.columns }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <span>⚠️</span>
+                <h3>Missing Values</h3>
+                <h2>{{ stats.missing_values }}</h2>
+            </div>
+
+            <div class="stat-card quality-card">
+                <span>✅</span>
+                <h3>Quality Score</h3>
+                <h2>{{ stats.quality_score }}%</h2>
+            </div>
+
+        </section>
+
+        <!-- ================= AUTO CHARTS ================= -->
+        <section class="auto-chart-grid">
+
+    {% for chart in charts %}
+
+        <article
+            class="auto-chart-card
+            {% if chart.type == 'scatter' %}wide-chart-card{% endif %}"
+        >
+
+            <div class="auto-chart-header">
+                <div>
+                    <h2>{{ chart.title }}</h2>
+
+                    <p>
+                        Interactive visualization generated from
+                        {{ filename }}
+                    </p>
+                </div>
+
+                <span class="auto-chart-badge">
+                    {{ chart.type | title }}
+                </span>
+            </div>
+
+            <div
+                class="auto-chart-canvas-wrapper
+                {% if chart.type in ['pie', 'doughnut'] %}
+                    distribution-chart-wrapper
+                {% elif chart.type == 'scatter' %}
+                    scatter-chart-wrapper
+                {% endif %}"
+            >
+                <canvas id="{{ chart.id }}"></canvas>
+            </div>
+
+        </article>
+
+    {% endfor %}
+
+</section>
+
+    </main>
+
+</div>
+
+<!-- ================= CHART.JS RENDERING ================= -->
+<script>
+const charts = {{ charts | tojson }};
+
+charts.forEach(chart => {
+    const chartElement =
+        document.getElementById(
+            chart.id
+        );
+
+    if (!chartElement) {
+        return;
+    }
+
+    const isScatter =
+        chart.type === "scatter";
+
+    const isDistribution =
+        chart.type === "pie"
+        || chart.type === "doughnut";
+
+    let chartData;
+
+    if (isScatter) {
+        chartData = {
+            datasets: [
+                {
+                    label: chart.title,
+
+                    data:
+                        chart.x_values.map(
+                            (xValue, index) => ({
+                                x: Number(xValue),
+                                y: Number(
+                                    chart.y_values[index]
+                                )
+                            })
+                        ),
+
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBorderWidth: 1
+                }
+            ]
+        };
+
+    } else {
+        chartData = {
+            labels:
+                chart.labels || [],
+
+            datasets: [
+                {
+                    label:
+                        chart.title,
+
+                    data:
+                        chart.values || [],
+
+                    borderWidth: 1,
+
+                    hoverOffset:
+                        isDistribution
+                            ? 8
+                            : 0
+                }
+            ]
+        };
+    }
+
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+
+        resizeDelay: 100,
+
+        interaction: {
+            intersect: false,
+            mode:
+                isScatter
+                    ? "nearest"
+                    : "index"
+        },
+
+        layout: {
+            padding: {
+                top: 10,
+                right: 15,
+                bottom: 10,
+                left: 10
+            }
+        },
+
+        plugins: {
+            legend: {
+                display: true,
+
+                position:
+                    isDistribution
+                        ? "bottom"
+                        : "top",
+
+                align: "center",
+
+                labels: {
+                    boxWidth: 14,
+                    boxHeight: 14,
+                    padding: 18,
+                    usePointStyle: true,
+                    font: {
+                        size: 13
+                    }
+                }
+            },
+
+            tooltip: {
+                enabled: true,
+
+                callbacks: {
+                    label: function(context) {
+                        if (isScatter) {
+                            const point =
+                                context.raw;
+
+                            return (
+                                "Postal Code: "
+                                + Number(
+                                    point.x
+                                ).toLocaleString()
+                                + " | Sales: "
+                                + Number(
+                                    point.y
+                                ).toLocaleString(
+                                    undefined,
+                                    {
+                                        maximumFractionDigits: 2
+                                    }
+                                )
+                            );
+                        }
+
+                        const value =
+                            Number(
+                                context.raw || 0
+                            );
+
+                        return (
+                            context.label
+                            + ": "
+                            + value.toLocaleString(
+                                undefined,
+                                {
+                                    maximumFractionDigits: 2
+                                }
+                            )
+                        );
+                    }
+                }
+            }
+        },
+
+        scales:
+            isDistribution
+                ? {}
+                : {
+                    x: {
+                        beginAtZero: false,
+
+                        grid: {
+                            display: false
+                        },
+
+                        ticks: {
+                            autoSkip: true,
+                            maxRotation: 45,
+                            minRotation: 0,
+                            maxTicksLimit:
+                                isScatter
+                                    ? 10
+                                    : 12
+                        },
+
+                        title: {
+                            display: isScatter,
+
+                            text:
+                                isScatter
+                                    ? (
+                                        chart.x_label
+                                        || "Postal Code"
+                                    )
+                                    : ""
+                        }
+                    },
+
+                    y: {
+                        beginAtZero: true,
+
+                        ticks: {
+                            callback:
+                                function(value) {
+                                    return Number(
+                                        value
+                                    ).toLocaleString(
+                                        undefined,
+                                        {
+                                            notation:
+                                                "compact",
+
+                                            maximumFractionDigits:
+                                                1
+                                        }
+                                    );
+                                }
+                        },
+
+                        title: {
+                            display: isScatter,
+
+                            text:
+                                isScatter
+                                    ? (
+                                        chart.y_label
+                                        || "Sales"
+                                    )
+                                    : ""
+                        }
+                    }
+                }
+    };
+
+    if (isDistribution) {
+        chartOptions.cutout =
+            chart.type === "doughnut"
+                ? "62%"
+                : undefined;
+    }
+
+    new Chart(
+        chartElement,
+        {
+            type: chart.type,
+            data: chartData,
+            options: chartOptions
+        }
+    );
+});
+</script>
+
+<!-- ================= SAVE DASHBOARD MODAL ================= -->
+<div
+    id="saveDashboardModal"
+    class="save-dashboard-modal"
+    aria-hidden="true"
+>
+
+    <div class="save-dashboard-backdrop"></div>
+
+    <section class="save-dashboard-modal-card">
+
+        <div class="save-dashboard-modal-header">
+
+            <div>
+
+                <span class="copilot-label">
+                    Workspace
+                </span>
+
+                <h2>
+                    Save Dashboard
+                </h2>
+
+                <p>
+                    Save this analytics dashboard inside one of your workspaces.
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                id="closeSaveDashboardButton"
+                class="save-dashboard-close-btn"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <div
+            id="saveDashboardMessage"
+            class="save-dashboard-message"
+            style="display: none;"
+        ></div>
+
+        <form id="saveDashboardForm">
+
+            <div class="save-dashboard-field">
+
+                <label for="saveDashboardWorkspace">
+                    Workspace
+                </label>
+
+                <select
+                    id="saveDashboardWorkspace"
+                    required
+                >
+                    <option value="">
+                        Loading workspaces...
+                    </option>
+                </select>
+
+            </div>
+
+            <div class="save-dashboard-field">
+
+                <label for="saveDashboardName">
+                    Dashboard Name
+                </label>
+
+                <input
+                    type="text"
+                    id="saveDashboardName"
+                    maxlength="100"
+                    required
+                >
+
+            </div>
+
+            <div class="save-dashboard-field">
+
+                <label for="saveDashboardDescription">
+                    Description
+                </label>
+
+                <textarea
+                    id="saveDashboardDescription"
+                    rows="4"
+                    maxlength="300"
+                    placeholder="Optional description..."
+                ></textarea>
+
+            </div>
+
+            <div class="save-dashboard-modal-actions">
+
+                <button
+                    type="button"
+                    id="cancelSaveDashboardButton"
+                    class="save-dashboard-secondary-btn"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    id="submitSaveDashboardButton"
+                    class="save-dashboard-primary-btn"
+                >
+                    Save Dashboard
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+<!-- ================= SAVE DASHBOARD CONFIG ================= -->
+<script>
+window.dashboardSaveConfig = {
+    filename: {{ filename | tojson }},
+    dashboardType: "analytics",
+    defaultName:
+        "Analytics Dashboard - {{ filename }}"
+};
+</script>
+
+<script
+    src="{{ url_for('static', filename='dashboard_save.js') }}"
+></script>
+
+</body>
+</html>

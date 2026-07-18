@@ -1,0 +1,83 @@
+<div class="global-topbar-actions">
+    <button
+        type="button"
+        id="sidebarOpenButton"
+        class="global-icon-button mobile-menu-button"
+        aria-label="Open navigation"
+    >
+        ☰
+    </button>
+
+    <button
+        type="button"
+        class="global-search-button"
+        data-open-command-palette
+    >
+        <span>⌕</span>
+        Search or run command
+        <kbd>Ctrl K</kbd>
+    </button>
+
+    <div class="global-topbar-spacer"></div>
+
+    <button
+        type="button"
+        id="themeToggleButton"
+        class="global-icon-button"
+        aria-label="Toggle theme"
+    >
+        🌙
+    </button>
+
+    <button
+        type="button"
+        id="notificationPanelButton"
+        class="global-icon-button notification-button"
+        aria-label="Open notifications"
+    >
+        🔔
+        <span
+            id="notificationBadge"
+            class="notification-badge"
+            style="display: none;"
+        >
+            0
+        </span>
+    </button>
+
+    <div class="global-user-menu">
+        <button
+            type="button"
+            id="userMenuButton"
+            class="global-user-button"
+        >
+            <span class="global-user-avatar">
+                {{ (user | default("U"))[:1] | upper }}
+            </span>
+
+            <span>
+                <strong>{{ user | default("User") }}</strong>
+                <small>Account</small>
+            </span>
+
+            <span>⌄</span>
+        </button>
+
+        <div
+            id="userMenuDropdown"
+            class="global-user-dropdown"
+        >
+            <a href="{{ url_for('workspace_page.workspace_page') }}">
+                Workspaces
+            </a>
+
+            <a href="{{ url_for('collaboration_page.collaboration_center') }}">
+                Collaboration
+            </a>
+
+            <a href="{{ url_for('auth.logout') }}">
+                Logout
+            </a>
+        </div>
+    </div>
+</div>

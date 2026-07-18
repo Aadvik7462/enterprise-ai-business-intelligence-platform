@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Dataset Preview | AI BI Platform
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='ui_system.css') }}"
+>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="dashboard-layout">
+
+    <!-- ================= SIDEBAR ================= -->
+{% set active_page = "upload" %}
+{% include "sidebar.html" %}
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main class="main-content">
+
+        <!-- ================= HEADER ================= -->
+        <header class="topbar preview-topbar">
+
+            <div>
+
+                <p class="breadcrumb">
+                    Dashboard / Upload / Dataset Preview
+                </p>
+
+                <h1>Dataset Preview</h1>
+
+                <p>
+                    File:
+                    <strong>{{ filename }}</strong>
+                </p>
+
+            </div>
+
+            <div class="topbar-actions">
+
+                <button
+                    type="button"
+                    id="openSaveDashboardButton"
+                    class="save-dashboard-trigger-btn"
+                >
+                    💾 Save Dashboard
+                </button>
+
+                <a
+                    href="{{ url_for('dashboard.dashboard') }}"
+                    class="back-btn"
+                >
+                    Back to Dashboard
+                </a>
+<a
+    href="{{ url_for('advanced_analytics_page.advanced_analytics_page', filename=filename) }}"
+    class="btn-advanced"
+>
+    📉 Advanced Analytics
+</a>
+<a
+    href="{{ url_for(
+        'ai_sql.ai_sql_page',
+        filename=filename
+    ) }}"
+    class="btn-advanced"
+>
+    🧠 AI SQL Assistant
+</a>
+<a
+    href="{{ url_for(
+        'ml_studio.ml_studio_page',
+        filename=filename
+    ) }}"
+    class="btn-advanced"
+>
+    🤖 Machine Learning Studio
+</a>
+<a
+    href="{{ url_for(
+        'automl.automl_page',
+        filename=filename
+    ) }}"
+    class="btn-advanced"
+>
+    ⚡ AutoML Studio
+</a>
+<a
+    href="{{ url_for(
+        'phase4.enterprise_ai_hub',
+        filename=filename
+    ) }}"
+    class="btn-advanced"
+>
+    🧠 Enterprise AI Hub
+</a>
+            </div>
+
+        </header>
+
+        <!-- ================= STATISTICS ================= -->
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <span>📊</span>
+                <h3>Total Rows</h3>
+                <h2>{{ stats.rows }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <span>🧩</span>
+                <h3>Total Columns</h3>
+                <h2>{{ stats.columns }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <span>⚠️</span>
+                <h3>Missing Values</h3>
+                <h2>{{ stats.missing_values }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <span>🔁</span>
+                <h3>Duplicate Rows</h3>
+                <h2>{{ stats.duplicate_rows }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <span>🔢</span>
+                <h3>Numeric Columns</h3>
+                <h2>{{ stats.numeric_columns }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <span>🔤</span>
+                <h3>Text Columns</h3>
+                <h2>{{ stats.categorical_columns }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <span>💾</span>
+                <h3>Memory Usage</h3>
+                <h2>{{ stats.memory_usage }} MB</h2>
+            </div>
+
+            <div class="stat-card quality-card">
+                <span>✅</span>
+                <h3>Quality Score</h3>
+                <h2>{{ stats.quality_score }}%</h2>
+            </div>
+
+        </section>
+
+        <!-- ================= DATASET HEALTH ================= -->
+        <section class="quality-section">
+
+            <div>
+                <h2>Dataset Health</h2>
+
+                <p>
+                    Your dataset quality is calculated using missing
+                    values and duplicate rows.
+                </p>
+            </div>
+
+            <div class="quality-bar">
+
+                <div
+                    class="quality-fill"
+                    style="width: {{ stats.quality_score }}%;"
+                ></div>
+
+            </div>
+
+        </section>
+
+        <!-- ================= CLEANING CENTER ================= -->
+        <section class="cleaning-section">
+
+            <div class="cleaning-header">
+
+                <div>
+                    <h2>Smart Data Cleaning Center</h2>
+
+                    <p>
+                        Automatically clean missing values, duplicates,
+                        empty rows, and column names.
+                    </p>
+                </div>
+
+                <a
+                    href="{{ url_for('data.clean_file', filename=filename) }}"
+                    class="clean-btn"
+                >
+                    Clean Dataset
+                </a>
+
+            </div>
+
+            {% if cleaning_report %}
+
+                <div class="cleaning-report-grid">
+
+                    <div class="clean-report-card">
+                        <h3>Rows Removed</h3>
+                        <h2>{{ cleaning_report.rows_removed }}</h2>
+                    </div>
+
+                    <div class="clean-report-card">
+                        <h3>Missing Values Fixed</h3>
+                        <h2>{{ cleaning_report.missing_fixed }}</h2>
+                    </div>
+
+                    <div class="clean-report-card">
+                        <h3>Duplicates Removed</h3>
+                        <h2>{{ cleaning_report.duplicates_removed }}</h2>
+                    </div>
+
+                    <div class="clean-report-card">
+                        <h3>Final Missing Values</h3>
+                        <h2>{{ cleaning_report.cleaned_missing }}</h2>
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+        <!-- ================= FORECAST CTA ================= -->
+        <section class="forecast-cta-section">
+
+            <div>
+                <h2>Forecasting Module</h2>
+
+                <p>
+                    Predict future trends using date and numeric
+                    columns from your dataset.
+                </p>
+            </div>
+
+            <a
+                href="{{ url_for('forecasting.forecast_page', filename=filename) }}"
+                class="forecast-btn"
+            >
+                Open Forecasting
+            </a>
+
+        </section>
+
+        <!-- ================= ANALYTICS CTA ================= -->
+        <section class="analytics-cta-section">
+
+            <div>
+                <h2>Automatic Analytics Dashboard</h2>
+
+                <p>
+                    Generate automatic charts and visual insights
+                    from your uploaded dataset.
+                </p>
+            </div>
+
+            <a
+                href="{{ url_for('analytics.analytics_dashboard', filename=filename) }}"
+                class="analytics-btn"
+            >
+                Open Analytics
+            </a>
+
+        </section>
+
+        <!-- ================= AI INSIGHTS ================= -->
+        <section class="ai-insights-section">
+
+            <div class="ai-header">
+
+                <div>
+                    <h2>AI Generated Insights</h2>
+
+                    <p>
+                        Automatic analysis based on dataset structure
+                        and values.
+                    </p>
+                </div>
+
+                <span class="ai-badge">
+                    AI Insights
+                </span>
+
+            </div>
+
+            <div class="insights-grid">
+
+                {% for insight in insights %}
+
+                    <div class="insight-card">
+                        <span>💡</span>
+                        <p>{{ insight }}</p>
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+        <!-- ================= EXECUTIVE CTA ================= -->
+        <section class="executive-cta-section">
+
+            <div>
+                <h2>Unified Executive Dashboard</h2>
+
+                <p>
+                    View KPIs, AI insights, charts, cleaning summary,
+                    and table preview in one dashboard.
+                </p>
+            </div>
+
+            <a
+                href="{{ url_for('executive.executive_dashboard', filename=filename) }}"
+                class="executive-btn"
+            >
+                Open Executive Dashboard
+            </a>
+
+        </section>
+<section class="executive-cta-section">
+
+    <div>
+
+        <h2>
+            Enterprise AI Center
+        </h2>
+
+        <p>
+
+            AI Business Health Score,
+            KPI Narration,
+            What-if Analysis,
+            Goal Tracking,
+            Scenario Planning,
+            Executive AI Reports.
+
+        </p>
+
+    </div>
+
+    <a
+        href="{{ url_for('enterprise_ai_page.enterprise_ai_page', filename=filename) }}"
+        class="executive-btn"
+    >
+        Open Enterprise AI
+    </a>
+
+</section>
+
+<section class="analytics-cta-section">
+
+    <div>
+
+        <h2>
+            Collaboration Center
+        </h2>
+
+        <p>
+
+            Invite team members,
+            share dashboards,
+            manage comments,
+            notifications
+            and audit logs.
+
+        </p>
+
+    </div>
+
+    <a
+        href="{{ url_for('collaboration_page.collaboration_center') }}"
+        class="analytics-btn"
+    >
+        Open Collaboration
+    </a>
+
+</section>
+
+        <!-- ================= PROFILE CHARTS ================= -->
+        <section class="profile-grid">
+
+            <div class="profile-card">
+
+                <h2>Data Type Distribution</h2>
+
+                <canvas id="dtypeChart"></canvas>
+
+            </div>
+
+            <div class="profile-card">
+
+                <h2>Missing Values by Column</h2>
+
+                {% if chart_data.missing_labels %}
+
+                    <canvas id="missingChart"></canvas>
+
+                {% else %}
+
+                    <div class="empty-state">
+                        <h3>No Missing Values</h3>
+                        <p>Your dataset has no missing values.</p>
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+        <!-- ================= COLUMN SUMMARY ================= -->
+        <section class="table-section modern-table-section">
+
+            <div class="table-toolbar">
+
+                <div>
+                    <h2>Column Summary</h2>
+
+                    <p>
+                        Data type, missing values, and unique values
+                        for each column.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="table-wrapper modern-table-wrapper">
+
+                <table class="data-table compact-table">
+
+                    <thead>
+                        <tr>
+                            <th>Column</th>
+                            <th>Data Type</th>
+                            <th>Missing Count</th>
+                            <th>Missing %</th>
+                            <th>Unique Values</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for col in column_summary %}
+
+                            <tr>
+                                <td>{{ col.column }}</td>
+                                <td>{{ col.dtype }}</td>
+                                <td>{{ col.missing_count }}</td>
+                                <td>{{ col.missing_percent }}%</td>
+                                <td>{{ col.unique_count }}</td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        <!-- ================= NUMERIC SUMMARY ================= -->
+        {% if numeric_summary %}
+
+            <section class="table-section modern-table-section">
+
+                <div class="table-toolbar">
+
+                    <div>
+                        <h2>Numeric Statistics</h2>
+
+                        <p>
+                            Descriptive statistics for numeric columns.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="table-wrapper modern-table-wrapper">
+
+                    <table class="data-table compact-table">
+
+                        <thead>
+                            <tr>
+                                <th>Column</th>
+                                <th>Count</th>
+                                <th>Mean</th>
+                                <th>Std</th>
+                                <th>Min</th>
+                                <th>Q1</th>
+                                <th>Median</th>
+                                <th>Q3</th>
+                                <th>Max</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for num in numeric_summary %}
+
+                                <tr>
+                                    <td>{{ num.column }}</td>
+                                    <td>{{ num.count }}</td>
+                                    <td>{{ num.mean }}</td>
+                                    <td>{{ num.std }}</td>
+                                    <td>{{ num.min }}</td>
+                                    <td>{{ num.q1 }}</td>
+                                    <td>{{ num.median }}</td>
+                                    <td>{{ num.q3 }}</td>
+                                    <td>{{ num.max }}</td>
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+        {% endif %}
+
+        <!-- ================= FIRST 10 ROWS ================= -->
+        <section class="table-section modern-table-section">
+
+            <div class="table-toolbar">
+
+                <div>
+                    <h2>First 10 Rows</h2>
+
+                    <p>
+                        Quick preview of your uploaded dataset.
+                    </p>
+                </div>
+
+                <input
+                    type="text"
+                    id="tableSearch"
+                    placeholder="Search in preview..."
+                    onkeyup="searchTable()"
+                >
+
+            </div>
+
+            <div class="table-wrapper modern-table-wrapper">
+                {{ preview_data | safe }}
+            </div>
+
+            <div class="table-footer">
+
+                <p>
+                    Showing first 10 records only.
+                </p>
+
+                <a
+                    href="{{ url_for('dashboard.dashboard') }}#upload-section"
+                    class="secondary-btn"
+                >
+                    Upload Another Dataset
+                </a>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<!-- ================= CHART SCRIPTS ================= -->
+<script>
+const dtypeLabels =
+    {{ chart_data.dtype_labels | tojson }};
+
+const dtypeValues =
+    {{ chart_data.dtype_values | tojson }};
+
+const missingLabels =
+    {{ chart_data.missing_labels | tojson }};
+
+const missingValues =
+    {{ chart_data.missing_values | tojson }};
+
+
+const dtypeChartElement =
+    document.getElementById(
+        "dtypeChart"
+    );
+
+
+if (dtypeChartElement) {
+    new Chart(
+        dtypeChartElement,
+        {
+            type: "doughnut",
+
+            data: {
+                labels: dtypeLabels,
+
+                datasets: [
+                    {
+                        data: dtypeValues
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+
+                plugins: {
+                    legend: {
+                        position: "bottom"
+                    }
+                }
+            }
+        }
+    );
+}
+
+
+if (missingLabels.length > 0) {
+    const missingChartElement =
+        document.getElementById(
+            "missingChart"
+        );
+
+    if (missingChartElement) {
+        new Chart(
+            missingChartElement,
+            {
+                type: "bar",
+
+                data: {
+                    labels: missingLabels,
+
+                    datasets: [
+                        {
+                            label:
+                                "Missing Values",
+
+                            data:
+                                missingValues
+                        }
+                    ]
+                },
+
+                options: {
+                    indexAxis: "y",
+                    responsive: true,
+
+                    plugins: {
+                        legend: {
+                            position: "top"
+                        }
+                    }
+                }
+            }
+        );
+    }
+}
+
+
+function searchTable() {
+    const input =
+        document.getElementById(
+            "tableSearch"
+        );
+
+    if (!input) {
+        return;
+    }
+
+    const filter =
+        input.value
+            .toLowerCase();
+
+    const tables =
+        document.querySelectorAll(
+            ".data-table"
+        );
+
+    if (!tables.length) {
+        return;
+    }
+
+    const previewTable =
+        tables[
+            tables.length - 1
+        ];
+
+    const rows =
+        previewTable.getElementsByTagName(
+            "tr"
+        );
+
+    for (
+        let index = 1;
+        index < rows.length;
+        index += 1
+    ) {
+        const rowText =
+            rows[index]
+                .innerText
+                .toLowerCase();
+
+        rows[index].style.display =
+            rowText.includes(filter)
+                ? ""
+                : "none";
+    }
+}
+</script>
+
+<!-- ================= SAVE DASHBOARD MODAL ================= -->
+<div
+    id="saveDashboardModal"
+    class="save-dashboard-modal"
+    aria-hidden="true"
+>
+
+    <div class="save-dashboard-backdrop"></div>
+
+    <section class="save-dashboard-modal-card">
+
+        <div class="save-dashboard-modal-header">
+
+            <div>
+
+                <span class="copilot-label">
+                    Workspace
+                </span>
+
+                <h2>Save Dashboard</h2>
+
+                <p>
+                    Save this dataset preview inside one
+                    of your workspaces.
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                id="closeSaveDashboardButton"
+                class="save-dashboard-close-btn"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <div
+            id="saveDashboardMessage"
+            class="save-dashboard-message"
+            style="display: none;"
+        ></div>
+
+        <form id="saveDashboardForm">
+
+            <div class="save-dashboard-field">
+
+                <label for="saveDashboardWorkspace">
+                    Workspace
+                </label>
+
+                <select
+                    id="saveDashboardWorkspace"
+                    required
+                >
+                    <option value="">
+                        Loading workspaces...
+                    </option>
+                </select>
+
+            </div>
+
+            <div class="save-dashboard-field">
+
+                <label for="saveDashboardName">
+                    Dashboard Name
+                </label>
+
+                <input
+                    type="text"
+                    id="saveDashboardName"
+                    maxlength="100"
+                    required
+                >
+
+            </div>
+
+            <div class="save-dashboard-field">
+
+                <label for="saveDashboardDescription">
+                    Description
+                </label>
+
+                <textarea
+                    id="saveDashboardDescription"
+                    rows="4"
+                    maxlength="300"
+                    placeholder="Optional description..."
+                ></textarea>
+
+            </div>
+
+            <div class="save-dashboard-modal-actions">
+
+                <button
+                    type="button"
+                    id="cancelSaveDashboardButton"
+                    class="save-dashboard-secondary-btn"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    id="submitSaveDashboardButton"
+                    class="save-dashboard-primary-btn"
+                >
+                    Save Dashboard
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+<!-- ================= SAVE DASHBOARD CONFIG ================= -->
+<script>
+window.dashboardSaveConfig = {
+    filename: {{ filename | tojson }},
+
+    dashboardType:
+        "preview",
+
+    defaultName:
+        "Dataset Preview - {{ filename }}"
+};
+</script>
+
+<script
+    src="{{ url_for('static', filename='dashboard_save.js') }}"
+></script>
+
+</body>
+</html>

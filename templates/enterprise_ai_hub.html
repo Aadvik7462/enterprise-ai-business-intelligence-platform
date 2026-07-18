@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enterprise AI Hub</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='ui_system.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='phase4_enterprise.css') }}">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+</head>
+<body>
+<div class="dashboard-layout">
+{% set active_page = "enterprise_ai" %}
+{% include "sidebar.html" %}
+<main class="main-content phase4-main">
+<section class="phase4-hero">
+<div>
+<span class="phase4-label"></span>
+<h1>Enterprise AI BI Platform</h1>
+<p>Advanced dashboard generation, reporting, copilot, forecasting, live monitoring, workspace collaboration, and automated insight discovery.</p>
+</div>
+<div class="phase4-summary">
+<div><span>Dataset</span><strong>{{ filename }}</strong></div>
+<div><span>Rows</span><strong>{{ row_count }}</strong></div>
+<div><span>Columns</span><strong>{{ column_count }}</strong></div>
+</div>
+</section>
+
+<section class="phase4-module-grid">
+<a class="phase4-module-card" href="{{ url_for('phase4.dashboard_generator_page', filename=filename) }}">
+<span></span><h2>AI Dashboard Generator</h2><p>Automatic KPIs, charts, layout, and insights.</p>
+</a>
+<a class="phase4-module-card" href="{{ url_for('phase4.report_writer_page', filename=filename) }}">
+<span></span><h2>AI Report Writer</h2><p>Executive summaries and recommendations.</p>
+</a>
+<a class="phase4-module-card" href="#copilotSection">
+<span></span><h2>Conversational BI Copilot</h2><p>Ask questions about the active dataset.</p>
+</a>
+<a class="phase4-module-card" href="{{ url_for('phase4.forecasting_page', filename=filename) }}">
+<span></span><h2>Forecasting Studio</h2><p>Trend projections and scenarios.</p>
+</a>
+<a class="phase4-module-card" href="{{ url_for('phase4.realtime_page', filename=filename) }}">
+<span></span><h2>Real-Time Analytics</h2><p>Refreshing KPIs and alert monitoring.</p>
+</a>
+<a class="phase4-module-card" href="{{ url_for('phase4.workspace_page', filename=filename) }}">
+<span></span><h2>Enterprise Workspace</h2><p>Published dashboards and activity.</p>
+</a>
+<a class="phase4-module-card" href="{{ url_for('phase4.insight_engine_page', filename=filename) }}">
+<span></span><h2>AI Insight Engine</h2><p>Anomalies, correlations, and recommendations.</p>
+</a>
+</section>
+
+<section id="copilotSection" class="phase4-card">
+<div class="phase4-card-header"><div><span class="phase4-label"></span><h2>Ask Your Dataset</h2></div></div>
+<div id="phase4ChatMessages" class="phase4-chat-messages">
+<div class="phase4-chat-message assistant">Ask for a summary, missing values, duplicate count, or a numeric calculation.</div>
+</div>
+<form id="phase4ChatForm" class="phase4-chat-form">
+<input id="phase4ChatInput" placeholder="Example: What is the average Sales?" required>
+<button type="submit">Ask Copilot</button>
+</form>
+</section>
+</main>
+</div>
+<script>
+window.phase4Config = {
+filename: {{ filename | tojson }},
+copilotEndpoint: {{ url_for('phase4.enterprise_copilot_chat') | tojson }}
+};
+</script>
+<script src="{{ url_for('static', filename='phase4_enterprise.js') }}"></script>
+</body>
+</html>

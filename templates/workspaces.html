@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Workspaces | AI BI Platform
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='workspace.css') }}"
+    >
+</head>
+
+<body>
+
+<div class="workspace-app-shell">
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="workspace-sidebar">
+
+        <div class="workspace-brand">
+            <div class="workspace-brand-icon">
+                AI
+            </div>
+
+            <div>
+                <h2>AI BI</h2>
+                <p>Business Intelligence</p>
+            </div>
+        </div>
+
+        <nav class="workspace-nav">
+
+            <a href="{{ url_for('dashboard.dashboard') }}">
+                <span>🏠</span>
+                Dashboard
+            </a>
+
+            <a
+                href="{{ url_for('workspace_page.workspace_page') }}"
+                class="active"
+            >
+                <span>🗂️</span>
+                Workspaces
+            </a>
+
+            <a href="{{ url_for('dashboard.dashboard') }}#upload-section">
+                <span>⬆️</span>
+                Upload Dataset
+            </a>
+
+            <a href="{{ url_for('auth.logout') }}">
+                <span>↩</span>
+                Logout
+            </a>
+
+        </nav>
+
+        <div class="workspace-sidebar-footer">
+            <span>Default Workspace</span>
+
+            <strong>
+                {% if default_workspace %}
+                    {{ default_workspace.name }}
+                {% else %}
+                    Personal Workspace
+                {% endif %}
+            </strong>
+        </div>
+
+    </aside>
+
+    <!-- ================= MAIN ================= -->
+    <main class="workspace-main">
+
+        <header class="workspace-topbar">
+
+            <div>
+                <p class="workspace-eyebrow">
+                    Enterprise Workspace
+                </p>
+
+                <h1>Workspace Management</h1>
+
+                <p>
+                    Organize dashboards, forecasts, and saved analytics
+                    across personal, team, and shared workspaces.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="primary-workspace-btn"
+                id="openCreateWorkspaceButton"
+            >
+                + New Workspace
+            </button>
+
+        </header>
+
+        <!-- ================= STATS ================= -->
+        <section class="workspace-stat-grid">
+
+            <article class="workspace-stat-card">
+                <span>Total Workspaces</span>
+                <strong id="totalWorkspaceStat">
+                    {{ total_workspaces }}
+                </strong>
+                <p>Personal, team, and shared</p>
+            </article>
+
+            <article class="workspace-stat-card">
+                <span>Saved Dashboards</span>
+                <strong id="totalDashboardStat">
+                    {{ total_dashboards }}
+                </strong>
+                <p>Across all workspaces</p>
+            </article>
+
+            <article class="workspace-stat-card">
+                <span>Favorites</span>
+                <strong id="favoriteDashboardStat">
+                    {{ favorite_count }}
+                </strong>
+                <p>Priority dashboards</p>
+            </article>
+
+            <article class="workspace-stat-card">
+                <span>Default Workspace</span>
+                <strong class="workspace-default-name">
+                    {% if default_workspace %}
+                        {{ default_workspace.name }}
+                    {% else %}
+                        Personal Workspace
+                    {% endif %}
+                </strong>
+                <p>Opened first after login</p>
+            </article>
+
+        </section>
+
+        <!-- ================= TOOLBAR ================= -->
+        <section class="workspace-toolbar">
+
+            <div class="workspace-search-box">
+                <span>⌕</span>
+
+                <input
+                    type="search"
+                    id="workspaceSearchInput"
+                    placeholder="Search workspaces..."
+                    autocomplete="off"
+                >
+            </div>
+
+            <select id="workspaceTypeFilter">
+                <option value="all">
+                    All Types
+                </option>
+
+                <option value="personal">
+                    Personal
+                </option>
+
+                <option value="team">
+                    Team
+                </option>
+
+                <option value="shared">
+                    Shared
+                </option>
+            </select>
+
+            <select id="workspaceSortSelect">
+                <option value="updated">
+                    Recently Updated
+                </option>
+
+                <option value="name">
+                    Name A–Z
+                </option>
+
+                <option value="dashboards">
+                    Dashboard Count
+                </option>
+            </select>
+
+        </section>
+
+        <div
+            id="workspaceAlert"
+            class="workspace-alert"
+            style="display: none;"
+        ></div>
+
+        <!-- ================= WORKSPACE GRID ================= -->
+        <section
+            id="workspaceGrid"
+            class="workspace-grid"
+        >
+
+            {% for workspace in workspaces %}
+
+                <article
+                    class="workspace-card"
+                    data-workspace-id="{{ workspace.id }}"
+                    data-workspace-name="{{ workspace.name | lower }}"
+                    data-workspace-type="{{ workspace.workspace_type }}"
+                    data-dashboard-count="{{ workspace.dashboard_count }}"
+                    data-updated-at="{{ workspace.updated_at }}"
+                >
+
+                    <div class="workspace-card-top">
+
+                        <div class="workspace-folder-icon">
+                            {% if workspace.workspace_type == "team" %}
+                                👥
+                            {% elif workspace.workspace_type == "shared" %}
+                                🌐
+                            {% else %}
+                                🏠
+                            {% endif %}
+                        </div>
+
+                        <div class="workspace-card-menu">
+                            {% if workspace.is_default %}
+                                <span class="workspace-default-badge">
+                                    Default
+                                </span>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                    <div class="workspace-card-content">
+
+                        <span class="workspace-type-label">
+                            {{ workspace.workspace_type | title }}
+                            Workspace
+                        </span>
+
+                        <h2>{{ workspace.name }}</h2>
+
+                        <p>
+                            {{ workspace.description or
+                               "No workspace description has been added." }}
+                        </p>
+
+                    </div>
+
+                    <div class="workspace-card-metrics">
+
+                        <div>
+                            <span>Dashboards</span>
+                            <strong>{{ workspace.dashboard_count }}</strong>
+                        </div>
+
+                        <div>
+                            <span>Updated</span>
+                            <strong>{{ workspace.updated_at[:10] }}</strong>
+                        </div>
+
+                    </div>
+
+                    <div class="workspace-card-actions">
+
+                        <button
+                            type="button"
+                            class="workspace-open-btn"
+                            data-action="open"
+                            data-workspace-id="{{ workspace.id }}"
+                        >
+                            Open
+                        </button>
+
+                        <button
+                            type="button"
+                            class="workspace-secondary-btn"
+                            data-action="edit"
+                            data-workspace-id="{{ workspace.id }}"
+                            data-workspace-name="{{ workspace.name }}"
+                            data-workspace-description="{{ workspace.description }}"
+                            data-workspace-type="{{ workspace.workspace_type }}"
+                        >
+                            Rename
+                        </button>
+
+                        {% if not workspace.is_default %}
+                            <button
+                                type="button"
+                                class="workspace-icon-btn"
+                                data-action="default"
+                                data-workspace-id="{{ workspace.id }}"
+                                title="Set as default"
+                            >
+                                ☆
+                            </button>
+                        {% endif %}
+
+                        {% if not (
+                            workspace.workspace_type == "personal"
+                            and workspace.is_default
+                        ) %}
+                            <button
+                                type="button"
+                                class="workspace-icon-btn danger"
+                                data-action="delete"
+                                data-workspace-id="{{ workspace.id }}"
+                                data-workspace-name="{{ workspace.name }}"
+                                title="Delete workspace"
+                            >
+                                🗑
+                            </button>
+                        {% endif %}
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        </section>
+
+        <div
+            id="workspaceEmptyState"
+            class="workspace-empty-state"
+            style="display: none;"
+        >
+            <div>🗂️</div>
+            <h2>No workspaces found</h2>
+            <p>Try changing your search or filter.</p>
+        </div>
+
+        <!-- ================= SAVED DASHBOARDS ================= -->
+        <section class="recent-dashboard-section">
+
+            <div class="recent-dashboard-header">
+
+                <div>
+                    <p class="workspace-eyebrow">
+                        Saved Analytics
+                    </p>
+
+                    <h2>Recent Dashboards</h2>
+
+                    <p>
+                        Open saved dashboards or continue working
+                        from the latest workspace snapshot.
+                    </p>
+                </div>
+
+                <label class="favorite-toggle">
+                    <input
+                        type="checkbox"
+                        id="favoritesOnlyToggle"
+                    >
+
+                    Favorites only
+                </label>
+
+            </div>
+
+            <div
+                id="recentDashboardGrid"
+                class="recent-dashboard-grid"
+            >
+
+                {% for dashboard in dashboards[:8] %}
+
+                    <article
+                        class="saved-dashboard-card"
+                        data-dashboard-id="{{ dashboard.id }}"
+                        data-workspace-id="{{ dashboard.workspace_id }}"
+                        data-favorite="{{ 1 if dashboard.is_favorite else 0 }}"
+                    >
+
+                        <div class="saved-dashboard-preview">
+                            <span>
+                                {% if dashboard.dashboard_type == "forecast" %}
+                                    📈
+                                {% elif dashboard.dashboard_type == "analytics" %}
+                                    📊
+                                {% else %}
+                                    📋
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <div class="saved-dashboard-content">
+
+                            <div class="saved-dashboard-title-row">
+                                <div>
+                                    <span>
+                                        {{ dashboard.workspace_name }}
+                                    </span>
+
+                                    <h3>{{ dashboard.name }}</h3>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    class="favorite-dashboard-btn
+                                    {% if dashboard.is_favorite %}active{% endif %}"
+                                    data-dashboard-id="{{ dashboard.id }}"
+                                    title="Toggle favorite"
+                                >
+                                    ★
+                                </button>
+                            </div>
+
+                            <p>
+                                {{ dashboard.description or
+                                   "Saved dashboard snapshot." }}
+                            </p>
+
+                            <div class="saved-dashboard-meta">
+                                <span>
+                                    {{ dashboard.dashboard_type | title }}
+                                </span>
+
+                                <span>
+                                    {{ dashboard.updated_at[:10] }}
+                                </span>
+                            </div>
+
+                            <div class="saved-dashboard-actions">
+
+                                <button
+                                    type="button"
+                                    class="open-saved-dashboard-btn"
+                                    data-dashboard-id="{{ dashboard.id }}"
+                                    data-dashboard-type="{{ dashboard.dashboard_type }}"
+                                    data-filename="{{ dashboard.filename }}"
+                                >
+                                    Open Dashboard
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                {% endfor %}
+
+            </div>
+
+            <div
+                id="dashboardEmptyState"
+                class="workspace-empty-state"
+                {% if dashboards %}
+                    style="display: none;"
+                {% endif %}
+            >
+                <div>📊</div>
+                <h2>No saved dashboards yet</h2>
+                <p>
+                    Save a dashboard from Analytics, Forecasting,
+                    or Executive Dashboard.
+                </p>
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<!-- ================= CREATE / EDIT MODAL ================= -->
+<div
+    id="workspaceModal"
+    class="workspace-modal"
+    aria-hidden="true"
+>
+
+    <div class="workspace-modal-backdrop"></div>
+
+    <section class="workspace-modal-card">
+
+        <div class="workspace-modal-header">
+            <div>
+                <span class="workspace-eyebrow">
+                    Workspace
+                </span>
+
+                <h2 id="workspaceModalTitle">
+                    Create Workspace
+                </h2>
+            </div>
+
+            <button
+                type="button"
+                id="closeWorkspaceModalButton"
+                class="workspace-modal-close"
+            >
+                ×
+            </button>
+        </div>
+
+        <form id="workspaceForm">
+
+            <input
+                type="hidden"
+                id="workspaceId"
+            >
+
+            <div class="workspace-form-field">
+                <label for="workspaceName">
+                    Workspace Name
+                </label>
+
+                <input
+                    type="text"
+                    id="workspaceName"
+                    maxlength="80"
+                    required
+                >
+            </div>
+
+            <div class="workspace-form-field">
+                <label for="workspaceDescription">
+                    Description
+                </label>
+
+                <textarea
+                    id="workspaceDescription"
+                    rows="4"
+                    maxlength="300"
+                ></textarea>
+            </div>
+
+            <div class="workspace-form-field">
+                <label for="workspaceType">
+                    Workspace Type
+                </label>
+
+                <select id="workspaceType">
+                    <option value="personal">
+                        Personal
+                    </option>
+
+                    <option value="team">
+                        Team
+                    </option>
+
+                    <option value="shared">
+                        Shared
+                    </option>
+                </select>
+            </div>
+
+            <label class="workspace-checkbox-field">
+                <input
+                    type="checkbox"
+                    id="workspaceIsDefault"
+                >
+
+                Make this my default workspace
+            </label>
+
+            <div class="workspace-modal-actions">
+                <button
+                    type="button"
+                    id="cancelWorkspaceButton"
+                    class="workspace-secondary-btn"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    id="saveWorkspaceButton"
+                    class="primary-workspace-btn"
+                >
+                    Create Workspace
+                </button>
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+<script>
+window.workspacePageConfig = {
+    workspacesApi:
+        "{{ url_for('workspace.get_workspaces') }}",
+
+    createWorkspaceApi:
+        "{{ url_for('workspace.create_workspace_route') }}",
+
+    dashboardListApi:
+        "{{ url_for('workspace.get_all_saved_dashboards') }}",
+
+    dashboardBaseUrl:
+        "/api/dashboards",
+
+    workspaceBaseUrl:
+        "/api/workspaces",
+
+    executiveBaseUrl:
+        "/executive-dashboard/",
+
+    forecastBaseUrl:
+        "/forecasting/",
+
+    analyticsBaseUrl:
+        "/analytics/",
+
+    previewBaseUrl:
+        "/preview/"
+};
+</script>
+
+<script
+    src="{{ url_for('static', filename='workspace.js') }}"
+></script>
+
+</body>
+</html>

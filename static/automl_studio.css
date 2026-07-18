@@ -1,0 +1,498 @@
+
+.automl-main {
+    padding-bottom: 60px;
+}
+
+.automl-hero {
+    margin-bottom: 24px;
+    padding: 30px;
+    border-radius: 24px;
+    color: #ffffff;
+    background:
+        linear-gradient(
+            135deg,
+            #020617,
+            #1e3a8a 54%,
+            #7c3aed
+        );
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    box-shadow:
+        0 24px 60px rgba(30, 64, 175, 0.24);
+}
+
+.automl-eyebrow {
+    display: inline-block;
+    margin-bottom: 7px;
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.automl-hero .automl-eyebrow {
+    color: #c4b5fd;
+}
+
+.automl-hero h1 {
+    margin: 0;
+    font-size: clamp(34px, 4vw, 50px);
+}
+
+.automl-hero p {
+    max-width: 680px;
+    margin: 10px 0 0;
+    color: #dbeafe;
+    line-height: 1.6;
+}
+
+.automl-dataset-summary {
+    min-width: 260px;
+    display: grid;
+    gap: 10px;
+}
+
+.automl-dataset-summary > div {
+    padding: 13px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.automl-dataset-summary span,
+.automl-dataset-summary strong {
+    display: block;
+}
+
+.automl-dataset-summary span {
+    margin-bottom: 4px;
+    font-size: 11px;
+    opacity: 0.76;
+}
+
+.automl-dataset-summary strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.automl-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(250px, 0.32fr)
+        minmax(0, 1fr);
+    gap: 22px;
+    align-items: start;
+}
+
+.automl-schema-panel,
+.automl-card,
+.automl-results,
+.automl-progress-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 21px;
+    background: #ffffff;
+    box-shadow:
+        0 14px 34px rgba(15, 23, 42, 0.06);
+}
+
+.automl-schema-panel {
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 40px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.automl-panel-header,
+.automl-card,
+.automl-results,
+.automl-progress-card {
+    padding: 22px;
+}
+
+.automl-panel-header {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.automl-panel-header h2,
+.automl-card h2,
+.automl-results h2,
+.automl-card h3 {
+    margin: 0;
+    color: #0f172a;
+}
+
+.automl-schema-list {
+    padding: 12px;
+    overflow-y: auto;
+}
+
+.automl-schema-row {
+    margin-bottom: 8px;
+    padding: 11px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 11px;
+    background: #f8fafc;
+}
+
+.automl-schema-row strong,
+.automl-schema-row small {
+    display: block;
+}
+
+.automl-schema-row small {
+    color: #64748b;
+}
+
+.automl-schema-meta {
+    margin-top: 7px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.automl-schema-meta span {
+    padding: 3px 7px;
+    border-radius: 999px;
+    color: #475569;
+    background: #e2e8f0;
+    font-size: 10px;
+}
+
+.automl-workspace {
+    min-width: 0;
+    display: grid;
+    gap: 20px;
+}
+
+.automl-card-header,
+.automl-result-header {
+    margin-bottom: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.automl-form-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.automl-field label {
+    display: block;
+    margin-bottom: 7px;
+    color: #334155;
+    font-weight: 700;
+}
+
+.automl-field select {
+    width: 100%;
+    padding: 12px 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    color: #0f172a;
+    background: #ffffff;
+    font: inherit;
+}
+
+.automl-model-list {
+    margin: 20px 0;
+    padding: 16px;
+    border-radius: 15px;
+    background: #f8fafc;
+}
+
+.automl-model-list h3 {
+    margin-bottom: 12px;
+    font-size: 15px;
+}
+
+.automl-model-chips {
+    display: flex;
+    gap: 9px;
+    flex-wrap: wrap;
+}
+
+.automl-model-chips span {
+    padding: 7px 10px;
+    border: 1px solid #bfdbfe;
+    border-radius: 999px;
+    color: #1d4ed8;
+    background: #eff6ff;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.automl-primary-button,
+.automl-download-button {
+    border: 0;
+    border-radius: 13px;
+    padding: 13px 18px;
+    color: #ffffff !important;
+    background:
+        linear-gradient(
+            135deg,
+            #2563eb,
+            #7c3aed
+        );
+    font-weight: 800;
+    text-decoration: none !important;
+    cursor: pointer;
+}
+
+.automl-primary-button {
+    width: 100%;
+}
+
+.automl-primary-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.automl-download-button.secondary {
+    color: #1d4ed8 !important;
+    background: #eff6ff;
+}
+
+.automl-download-group {
+    display: flex;
+    gap: 9px;
+    flex-wrap: wrap;
+}
+
+.automl-progress-header {
+    margin-bottom: 13px;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.automl-progress-header strong,
+.automl-progress-header span {
+    display: block;
+}
+
+.automl-progress-header span {
+    margin-top: 4px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.automl-progress-track {
+    height: 10px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    overflow: hidden;
+}
+
+.automl-progress-track > div {
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background:
+        linear-gradient(
+            90deg,
+            #2563eb,
+            #7c3aed
+        );
+    transition: width 0.35s ease;
+}
+
+.automl-status {
+    padding: 14px 16px;
+    border-radius: 13px;
+    color: #1e40af;
+    background: #dbeafe;
+    font-weight: 700;
+}
+
+.automl-status.error {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+.automl-results {
+    display: grid;
+    gap: 20px;
+}
+
+.automl-best-model-card {
+    padding: 22px;
+    border: 1px solid #c4b5fd;
+    border-radius: 18px;
+    background:
+        linear-gradient(
+            145deg,
+            #f5f3ff,
+            #eff6ff
+        );
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.automl-best-model-card h3 {
+    margin: 0;
+    color: #312e81;
+    font-size: 28px;
+}
+
+.automl-best-model-card p {
+    margin: 8px 0 0;
+    color: #475569;
+}
+
+.automl-best-metrics {
+    display: grid;
+    grid-template-columns:
+        repeat(2, minmax(110px, 1fr));
+    gap: 10px;
+}
+
+.automl-best-metric {
+    padding: 12px 14px;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.automl-best-metric span,
+.automl-best-metric strong {
+    display: block;
+}
+
+.automl-best-metric span {
+    color: #64748b;
+    font-size: 11px;
+}
+
+.automl-best-metric strong {
+    margin-top: 4px;
+    color: #4338ca;
+    font-size: 20px;
+}
+
+.automl-two-column {
+    display: grid;
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.automl-chart {
+    width: 100%;
+    height: 390px;
+}
+
+.automl-feature-list {
+    display: grid;
+    gap: 10px;
+}
+
+.automl-feature-item {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1fr)
+        auto;
+    gap: 9px;
+    align-items: center;
+}
+
+.automl-feature-item span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.automl-feature-bar {
+    grid-column: 1 / -1;
+    height: 8px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    overflow: hidden;
+}
+
+.automl-feature-bar > div {
+    height: 100%;
+    border-radius: inherit;
+    background:
+        linear-gradient(
+            90deg,
+            #2563eb,
+            #7c3aed
+        );
+}
+
+.automl-table-wrapper {
+    overflow: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+}
+
+#automlLeaderboardTable,
+#automlPreviewTable {
+    width: 100%;
+    min-width: 700px;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+#automlLeaderboardTable th,
+#automlLeaderboardTable td,
+#automlPreviewTable th,
+#automlPreviewTable td {
+    padding: 11px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+    white-space: nowrap;
+}
+
+#automlLeaderboardTable th,
+#automlPreviewTable th {
+    position: sticky;
+    top: 0;
+    color: #ffffff;
+    background: #0f172a;
+}
+
+#automlLeaderboardTable tbody tr:first-child {
+    background: #ecfdf5;
+    font-weight: 800;
+}
+
+@media (max-width: 1100px) {
+    .automl-grid,
+    .automl-two-column {
+        grid-template-columns: 1fr;
+    }
+
+    .automl-schema-panel {
+        position: static;
+        max-height: 420px;
+    }
+}
+
+@media (max-width: 760px) {
+    .automl-hero,
+    .automl-result-header,
+    .automl-best-model-card {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .automl-dataset-summary,
+    .automl-form-grid,
+    .automl-best-metrics {
+        width: 100%;
+        grid-template-columns: 1fr;
+    }
+}

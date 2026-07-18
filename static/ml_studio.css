@@ -1,0 +1,341 @@
+
+.ml-studio-main {
+    padding-bottom: 60px;
+}
+
+.ml-studio-hero {
+    margin-bottom: 24px;
+    padding: 30px;
+    border-radius: 24px;
+    color: #ffffff;
+    background: linear-gradient(135deg, #0f172a, #1d4ed8 58%, #4f46e5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    box-shadow: 0 22px 55px rgba(37, 99, 235, 0.22);
+}
+
+.ml-studio-label {
+    display: inline-block;
+    margin-bottom: 7px;
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.ml-studio-hero .ml-studio-label {
+    color: #bfdbfe;
+}
+
+.ml-studio-hero h1 {
+    margin: 0;
+    font-size: clamp(32px, 4vw, 48px);
+}
+
+.ml-studio-hero p {
+    margin: 10px 0 0;
+    color: #dbeafe;
+}
+
+.ml-studio-meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+    gap: 12px;
+}
+
+.ml-studio-meta > div {
+    padding: 15px 17px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.ml-studio-meta span {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.ml-studio-meta strong {
+    font-size: 18px;
+}
+
+.ml-studio-layout {
+    display: grid;
+    grid-template-columns: minmax(250px, 0.32fr) minmax(0, 1fr);
+    gap: 22px;
+    align-items: start;
+}
+
+.ml-studio-schema,
+.ml-studio-card,
+.ml-studio-results {
+    border: 1px solid #e2e8f0;
+    border-radius: 21px;
+    background: #ffffff;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
+}
+
+.ml-studio-schema {
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 40px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.ml-studio-panel-header,
+.ml-studio-card,
+.ml-studio-results {
+    padding: 22px;
+}
+
+.ml-studio-panel-header {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.ml-studio-panel-header h2,
+.ml-studio-card h2,
+.ml-studio-results h2,
+.ml-studio-card h3 {
+    margin: 0;
+    color: #0f172a;
+}
+
+.ml-studio-column-list {
+    padding: 12px;
+    overflow-y: auto;
+}
+
+.ml-studio-column {
+    margin-bottom: 8px;
+    padding: 11px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 11px;
+    background: #f8fafc;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.ml-studio-column strong,
+.ml-studio-column small {
+    display: block;
+}
+
+.ml-studio-column small,
+.ml-studio-column > span {
+    color: #64748b;
+    font-size: 11px;
+}
+
+.ml-studio-workspace {
+    min-width: 0;
+    display: grid;
+    gap: 20px;
+}
+
+.ml-studio-card-header,
+.ml-studio-result-header {
+    margin-bottom: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.ml-studio-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.ml-studio-field label {
+    display: block;
+    margin-bottom: 7px;
+    color: #334155;
+    font-weight: 700;
+}
+
+.ml-studio-field select,
+.ml-studio-field input {
+    width: 100%;
+    padding: 12px 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    color: #0f172a;
+    background: #ffffff;
+    font: inherit;
+}
+
+.ml-studio-primary-button,
+.ml-studio-download-button {
+    border: 0;
+    border-radius: 13px;
+    padding: 13px 18px;
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #2563eb, #4f46e5);
+    font-weight: 800;
+    text-decoration: none !important;
+    cursor: pointer;
+}
+
+.ml-studio-primary-button {
+    width: 100%;
+}
+
+.ml-studio-primary-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.ml-studio-status {
+    padding: 14px 16px;
+    border-radius: 13px;
+    color: #1e40af;
+    background: #dbeafe;
+    font-weight: 700;
+}
+
+.ml-studio-status.error {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+.ml-studio-results {
+    display: grid;
+    gap: 20px;
+}
+
+.ml-studio-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+}
+
+.ml-studio-metric-card {
+    padding: 17px;
+    border: 1px solid #dbeafe;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #eff6ff, #ffffff);
+}
+
+.ml-studio-metric-card span {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.ml-studio-metric-card strong {
+    display: block;
+    margin-top: 6px;
+    color: #1d4ed8;
+    font-size: 24px;
+}
+
+.ml-studio-two-column {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.ml-studio-chart {
+    width: 100%;
+    height: 390px;
+    margin-top: 14px;
+}
+
+.ml-feature-list {
+    margin-top: 14px;
+    display: grid;
+    gap: 9px;
+}
+
+.ml-feature-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.ml-feature-item span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ml-feature-bar {
+    grid-column: 1 / -1;
+    height: 8px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    overflow: hidden;
+}
+
+.ml-feature-bar > div {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #2563eb, #4f46e5);
+}
+
+.ml-studio-table-wrapper {
+    margin-top: 14px;
+    max-height: 420px;
+    overflow: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+}
+
+#mlPreviewTable {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+#mlPreviewTable th,
+#mlPreviewTable td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+    white-space: nowrap;
+}
+
+#mlPreviewTable th {
+    position: sticky;
+    top: 0;
+    color: #ffffff;
+    background: #0f172a;
+}
+
+@media (max-width: 1050px) {
+    .ml-studio-layout,
+    .ml-studio-two-column {
+        grid-template-columns: 1fr;
+    }
+
+    .ml-studio-schema {
+        position: static;
+        max-height: 420px;
+    }
+}
+
+@media (max-width: 720px) {
+    .ml-studio-hero,
+    .ml-studio-result-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .ml-studio-meta,
+    .ml-studio-form-grid {
+        width: 100%;
+        grid-template-columns: 1fr;
+    }
+}

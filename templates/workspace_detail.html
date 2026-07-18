@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ workspace.name }} | AI BI Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='workspace_detail.css') }}">
+</head>
+<body>
+<div class="wd-shell">
+    <aside class="wd-sidebar">
+        <div class="wd-brand"><span>AI</span><div><h2>AI BI</h2><p>Business Intelligence</p></div></div>
+        <nav>
+            <a href="{{ url_for('dashboard.dashboard') }}">🏠 Dashboard</a>
+            <a class="active" href="{{ url_for('workspace_page.workspace_page') }}">🗂️ Workspaces</a>
+            <a href="{{ url_for('dashboard.dashboard') }}#upload-section">⬆️ Upload Dataset</a>
+            <a href="{{ url_for('auth.logout') }}">↩ Logout</a>
+        </nav>
+        <div class="wd-current"><small>Current Workspace</small><strong>{{ workspace.name }}</strong><span>{{ workspace.workspace_type|title }}</span></div>
+    </aside>
+
+    <main class="wd-main">
+        <header class="wd-header">
+            <div>
+                <a class="wd-back" href="{{ url_for('workspace_page.workspace_page') }}">← Back to Workspaces</a>
+                <p class="wd-eyebrow">{{ workspace.workspace_type|title }} Workspace</p>
+                <h1>{{ workspace.name }}</h1>
+                <p>{{ workspace.description or 'Manage saved dashboards and analytics in this workspace.' }}</p>
+            </div>
+            <div class="wd-header-actions">
+                {% if workspace.is_default %}<span class="wd-default">Default Workspace</span>{% endif %}
+                <a class="wd-primary-link" href="{{ url_for('dashboard.dashboard') }}#upload-section">+ Upload Dataset</a>
+            </div>
+        </header>
+
+        <section class="wd-stats">
+            <article><span>Total Dashboards</span><strong>{{ total_dashboards }}</strong><p>Saved in this workspace</p></article>
+            <article><span>Favorites</span><strong>{{ favorite_count }}</strong><p>Priority dashboards</p></article>
+            <article><span>Analytics</span><strong>{{ dashboard_type_counts.get('analytics', 0) }}</strong><p>Analytics dashboards</p></article>
+            <article><span>Forecasts</span><strong>{{ dashboard_type_counts.get('forecast', 0) }}</strong><p>Forecast dashboards</p></article>
+        </section>
+
+        {% if recent_dashboard %}
+        <section class="wd-recent">
+            <div><p class="wd-eyebrow">Most Recent</p><h2>{{ recent_dashboard.name }}</h2><p>{{ recent_dashboard.description or 'Continue from your latest saved dashboard.' }}</p></div>
+            <button data-open-dashboard data-dashboard-type="{{ recent_dashboard.dashboard_type }}" data-filename="{{ recent_dashboard.filename }}">Open Latest Dashboard</button>
+        </section>
+        {% endif %}
+
+        <section class="wd-toolbar">
+            <input id="dashboardSearchInput" type="search" placeholder="Search saved dashboards...">
+            <select id="dashboardTypeFilter"><option value="all">All Types</option><option value="executive">Executive</option><option value="analytics">Analytics</option><option value="forecast">Forecast</option><option value="preview">Preview</option></select>
+            <select id="dashboardSortSelect"><option value="updated">Recently Updated</option><option value="name">Name A-Z</option><option value="favorites">Favorites First</option></select>
+            <label><input id="dashboardFavoritesOnly" type="checkbox"> Favorites only</label>
+        </section>
+
+        <div id="workspaceDetailAlert" class="wd-alert" style="display:none"></div>
+
+        <section id="workspaceDashboardGrid" class="wd-grid">
+            {% for dashboard in dashboards %}
+            <article class="wd-card" data-dashboard-id="{{ dashboard.id }}" data-dashboard-name="{{ dashboard.name|lower }}" data-dashboard-type="{{ dashboard.dashboard_type }}" data-dashboard-favorite="{{ 1 if dashboard.is_favorite else 0 }}" data-dashboard-updated="{{ dashboard.updated_at }}">
+                <div class="wd-preview">
+                    <span>{% if dashboard.dashboard_type == 'forecast' %}📈{% elif dashboard.dashboard_type == 'analytics' %}📊{% elif dashboard.dashboard_type == 'preview' %}🧾{% else %}📋{% endif %}</span>
+                    <button class="wd-fav {% if dashboard.is_favorite %}active{% endif %}" data-action="favorite" data-dashboard-id="{{ dashboard.id }}">★</button>
+                </div>
+                <div class="wd-content">
+                    <span class="wd-type">{{ dashboard.dashboard_type|title }}</span>
+                    <h2>{{ dashboard.name }}</h2>
+                    <p>{{ dashboard.description or 'Saved dashboard snapshot.' }}</p>
+                    <div class="wd-meta"><span>Dataset: <strong>{{ dashboard.filename }}</strong></span><span>Updated: <strong>{{ dashboard.updated_at[:10] }}</strong></span></div>
+                </div>
+                <div class="wd-actions">
+                    <button class="wd-open" data-action="open" data-dashboard-id="{{ dashboard.id }}" data-dashboard-type="{{ dashboard.dashboard_type }}" data-filename="{{ dashboard.filename }}">Open</button>
+                    <button data-action="rename" data-dashboard-id="{{ dashboard.id }}" data-dashboard-name="{{ dashboard.name }}" data-dashboard-description="{{ dashboard.description }}">Rename</button>
+                    <button data-action="duplicate" data-dashboard-id="{{ dashboard.id }}" data-dashboard-name="{{ dashboard.name }}">⧉</button>
+                    <button class="danger" data-action="delete" data-dashboard-id="{{ dashboard.id }}" data-dashboard-name="{{ dashboard.name }}">🗑</button>
+                </div>
+            </article>
+            {% endfor %}
+        </section>
+
+        <section id="workspaceDashboardEmptyState" class="wd-empty" {% if dashboards %}style="display:none"{% endif %}><div>📊</div><h2>No dashboards found</h2><p>Save a dashboard from Analytics, Forecasting, Executive Dashboard, or Dataset Preview.</p></section>
+    </main>
+</div>
+
+<div id="renameDashboardModal" class="wd-modal" aria-hidden="true">
+    <div class="wd-backdrop"></div>
+    <section class="wd-modal-card">
+        <div class="wd-modal-head"><div><p class="wd-eyebrow">Saved Dashboard</p><h2>Rename Dashboard</h2></div><button data-close-rename-modal>×</button></div>
+        <form id="renameDashboardForm">
+            <input id="renameDashboardId" type="hidden">
+            <label>Dashboard Name<input id="renameDashboardName" type="text" maxlength="100" required></label>
+            <label>Description<textarea id="renameDashboardDescription" rows="4" maxlength="300"></textarea></label>
+            <div class="wd-modal-actions"><button type="button" data-close-rename-modal>Cancel</button><button id="saveRenameDashboardButton" class="wd-open" type="submit">Save Changes</button></div>
+        </form>
+    </section>
+</div>
+
+<script>
+window.workspaceDetailConfig = {
+    workspaceId: {{ workspace.id|tojson }},
+    dashboardBaseUrl: "/api/dashboards",
+    executiveBaseUrl: "/executive-dashboard/",
+    forecastBaseUrl: "/forecasting/",
+    analyticsBaseUrl: "/analytics/",
+    previewBaseUrl: "/preview/"
+};
+</script>
+<script src="{{ url_for('static', filename='workspace_detail.js') }}"></script>
+</body>
+</html>

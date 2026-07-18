@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Analytics | AI BI Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='ui_system.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='advanced_analytics.css') }}">
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body>
+<div class="dashboard-layout">
+    {% include "sidebar.html" %}
+    <main class="main-content">
+        <header class="advanced-analytics-header">
+            <div>
+                <p class="breadcrumb">Dashboard / Advanced Analytics</p>
+                <h1>Advanced Analytics Center</h1>
+                <p>Dataset: <strong>{{ filename }}</strong></p>
+            </div>
+            {% include "global_topbar_actions.html" %}
+        </header>
+
+        <section class="advanced-analytics-toolbar">
+            <select id="advancedTargetColumn">
+                {% for column in numeric_columns %}
+                    <option value="{{ column }}">{{ column }}</option>
+                {% endfor %}
+            </select>
+            <button type="button" id="loadAdvancedAnalyticsButton">Run Advanced Analysis</button>
+        </section>
+
+        <section class="advanced-analytics-grid">
+            <article class="advanced-analytics-card wide"><h2>Correlation Heatmap</h2><div id="correlationHeatmap"></div></article>
+            <article class="advanced-analytics-card"><h2>Feature Importance</h2><div id="featureImportanceChart"></div></article>
+            <article class="advanced-analytics-card"><h2>Outlier Detection</h2><div id="outlierChart"></div></article>
+            <article class="advanced-analytics-card wide"><h2>Missing Value Analysis</h2><div id="missingValueChart"></div></article>
+            <article class="advanced-analytics-card wide">
+                <h2>Statistical Summary</h2>
+                <div class="advanced-table-wrapper">
+                    <table class="advanced-table">
+                        <thead><tr><th>Column</th><th>Count</th><th>Mean</th><th>Median</th><th>Std</th><th>Min</th><th>Max</th><th>Skewness</th><th>Kurtosis</th></tr></thead>
+                        <tbody id="advancedStatisticsBody"></tbody>
+                    </table>
+                </div>
+            </article>
+        </section>
+    </main>
+</div>
+<script>window.advancedAnalyticsConfig = {filename: {{ filename | tojson }}};</script>
+<script src="{{ url_for('static', filename='advanced_analytics.js') }}"></script>
+{% include "ui_overlays.html" %}
+<script src="{{ url_for('static', filename='ui_system.js') }}"></script>
+</body>
+</html>

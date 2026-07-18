@@ -1,0 +1,129 @@
+<aside class="sidebar premium-sidebar" id="appSidebar">
+    <div class="brand-box">
+        <div class="brand-row">
+            <div class="brand-mark">AI</div>
+            <div>
+                <h2>AI BI</h2>
+                <p>Intelligence Platform</p>
+            </div>
+        </div>
+
+        <button
+            type="button"
+            id="sidebarCloseButton"
+            class="sidebar-close-button"
+            aria-label="Close navigation"
+        >
+            ×
+        </button>
+    </div>
+
+    <nav>
+        <a
+            href="{{ url_for('dashboard.dashboard') }}"
+            class="{% if active_page == 'dashboard' %}active{% endif %}"
+        >
+            <span>🏠</span>
+            Dashboard
+        </a>
+
+        <a
+            href="{{ url_for('dashboard.dashboard') }}#upload-section"
+            class="{% if active_page == 'upload' %}active{% endif %}"
+        >
+            <span>📤</span>
+            Upload Dataset
+        </a>
+
+        {% if filename %}
+            <a
+                href="{{ url_for('analytics.analytics_dashboard', filename=filename) }}"
+                class="{% if active_page == 'analytics' %}active{% endif %}"
+            >
+                <span>📊</span>
+                Analytics
+            </a>
+
+            <a
+                href="{{ url_for('executive.executive_dashboard', filename=filename) }}"
+                class="{% if active_page == 'executive' %}active{% endif %}"
+            >
+                <span>📈</span>
+                Executive Dashboard
+            </a>
+
+            <a
+                href="{{ url_for('forecasting.forecast_page', filename=filename) }}"
+                class="{% if active_page == 'forecast' %}active{% endif %}"
+            >
+                <span>🔮</span>
+                Forecasting
+            </a>
+
+            <a
+                href="{{ url_for('enterprise_ai_page.enterprise_ai_page', filename=filename) }}"
+                class="{% if active_page == 'enterprise_ai' %}active{% endif %}"
+            >
+                <span>🧠</span>
+                Enterprise AI
+            </a>
+
+            <a
+    href="{{ url_for('advanced_analytics_page.advanced_analytics_page', filename=filename) }}"
+    class="{% if active_page == 'advanced_analytics' %}active{% endif %}"
+>
+    <span>📉</span>
+    Advanced Analytics
+</a>
+
+<a
+    href="{{ url_for('reporting_center.reporting_center_page', filename=filename) }}"
+    class="{% if active_page == 'reports' %}active{% endif %}"
+>
+    <span>📄</span>
+    Reporting Center
+</a>
+        {% endif %}
+
+        <a
+            href="{{ url_for('workspace_page.workspace_page') }}"
+            class="{% if active_page == 'workspaces' %}active{% endif %}"
+        >
+            <span>🗂️</span>
+            Workspaces
+        </a>
+
+        <a
+            href="{{ url_for('collaboration_page.collaboration_center') }}"
+            class="{% if active_page == 'collaboration' %}active{% endif %}"
+        >
+            <span>👥</span>
+            Collaboration
+        </a>
+
+        <button
+            type="button"
+            class="sidebar-command-button"
+            data-open-command-palette
+        >
+            <span>⌘</span>
+            Command Palette
+            <small>Ctrl K</small>
+        </button>
+
+    
+
+        <a href="{{ url_for('auth.logout') }}">
+            <span>🚪</span>
+            Logout
+        </a>
+    </nav>
+
+    <div class="sidebar-footer-card">
+        <span>Signed in</span>
+        <strong>{{ user | default("User") }}</strong>
+        <small>Enterprise workspace</small>
+    </div>
+</aside>
+
+<div id="sidebarOverlay" class="sidebar-overlay"></div>

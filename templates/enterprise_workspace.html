@@ -1,0 +1,16 @@
+
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Enterprise Workspace</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='ui_system.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='phase4_enterprise.css') }}">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body><div class="dashboard-layout">{% set active_page = "enterprise_ai" %}{% include "sidebar.html" %}
+<main class="main-content phase4-main">
+<section class="phase4-hero compact"><div><span class="phase4-label">Phase 4.6</span><h1>Enterprise Workspace</h1><p>Publish and organize dashboards for <strong>{{ filename }}</strong>.</p></div></section>
+<section class="phase4-card"><form id="phase4PublishForm" class="phase4-inline-form"><input id="phase4DashboardName" placeholder="Dashboard name" value="Executive AI Dashboard"><button type="submit">Publish Dashboard</button></form></section>
+<section class="phase4-two-column"><article class="phase4-card"><h2>Published Dashboards</h2><div id="phase4PublishedDashboards" class="phase4-stack">{% for dashboard in workspace.dashboards %}<article class="phase4-list-card"><strong>{{ dashboard.name }}</strong><span>{{ dashboard.status }} · {{ dashboard.filename }}</span></article>{% else %}<p>No dashboards published yet.</p>{% endfor %}</div></article>
+<article class="phase4-card"><h2>Workspace Activity</h2><div class="phase4-stack">{% for item in workspace.activity %}<article class="phase4-list-card"><span>{{ item.message }}</span></article>{% else %}<p>No recent activity.</p>{% endfor %}</div></article></section>
+</main></div>
+<script>window.phase4WorkspaceConfig={filename:{{ filename|tojson }},endpoint:{{ url_for('phase4.workspace_publish')|tojson }}};</script>
+<script src="{{ url_for('static', filename='phase4_enterprise.js') }}"></script></body></html>

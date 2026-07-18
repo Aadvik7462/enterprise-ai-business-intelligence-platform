@@ -1,0 +1,4109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <title>AI Forecast Studio | AI BI Platform</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='ui_system.css') }}"
+>
+
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+
+<body>
+
+<div class="dashboard-layout">
+
+<!-- ================= REUSABLE SIDEBAR ================= -->
+{% set active_page = "forecast" %}
+{% include "sidebar.html" %}
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main class="main-content">
+
+        <!-- ================= HEADER ================= -->
+        <header class="topbar preview-topbar">
+
+            <div>
+                <p class="breadcrumb">
+                    Dashboard / AI Forecast Studio
+                </p>
+
+                <h1>AI Forecast Studio</h1>
+
+                <p>
+                    Dataset:
+                    <strong>{{ filename }}</strong>
+                </p>
+            </div>
+
+           <div class="topbar-actions">
+
+    <button
+        type="button"
+        id="openSaveDashboardButton"
+        class="save-dashboard-trigger-btn"
+    >
+        💾 Save Dashboard
+    </button>
+
+    <a
+        href="{{ url_for('enterprise_ai_page.enterprise_ai_page', filename=filename) }}"
+        class="enterprise-ai-page-btn"
+    >
+        🧠 Enterprise AI
+    </a>
+
+    <a
+        href="{{ url_for('data.preview_dataset', filename=filename) }}"
+        class="back-btn"
+    >
+        Back to Preview
+    </a>
+<a
+    href="{{ url_for('advanced_analytics_page.advanced_analytics_page', filename=filename) }}"
+>
+    📉 Advanced Analytics
+</a>
+<a
+    href="{{ url_for('export.export_professional_pdf', filename=filename) }}"
+    class="export-pdf-button"
+>
+    📄 Professional PDF
+</a>
+</div>
+        </header>
+
+        <!-- ================= FORECAST CONTROLS ================= -->
+        <section class="forecast-section">
+
+            <div class="forecast-header">
+
+                <div>
+                    <span class="copilot-label">
+                        AI Forecasting
+                    </span>
+
+                    <h2>Generate Business Forecast</h2>
+
+                    <p>
+                        Select a date column, numeric KPI, and forecast period.
+                    </p>
+                </div>
+
+                <span class="copilot-status">
+                    <span class="status-dot"></span>
+                    Forecast Engine Ready
+                </span>
+
+            </div>
+
+            <form
+                id="forecastForm"
+                class="forecast-form"
+            >
+
+                <div class="forecast-field">
+
+                    <label for="dateColumn">
+                        Date Column
+                    </label>
+
+                    <select
+                        id="dateColumn"
+                        name="date_column"
+                        required
+                    >
+
+                        <option value="">
+                            Select Date Column
+                        </option>
+
+                        {% for col in forecast_options.date_columns %}
+
+                            <option
+                                value="{{ col }}"
+                                {% if forecast_options.default_date_column == col %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ col }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <div class="forecast-field">
+
+                    <label for="valueColumn">
+                        KPI / Value Column
+                    </label>
+
+                    <select
+                        id="valueColumn"
+                        name="value_column"
+                        required
+                    >
+
+                        <option value="">
+                            Select Numeric Column
+                        </option>
+
+                        {% for col in forecast_options.numeric_columns %}
+
+                            <option
+                                value="{{ col }}"
+                                {% if forecast_options.default_value_column == col %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ col }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <div class="forecast-field">
+
+                    <label for="forecastPeriods">
+                        Forecast Period
+                    </label>
+
+                    <select
+                        id="forecastPeriods"
+                        name="periods"
+                    >
+                        <option value="3">
+                            Next 3 Months
+                        </option>
+
+                        <option value="6" selected>
+                            Next 6 Months
+                        </option>
+
+                        <option value="12">
+                            Next 12 Months
+                        </option>
+
+                        <option value="18">
+                            Next 18 Months
+                        </option>
+
+                        <option value="24">
+                            Next 24 Months
+                        </option>
+                    </select>
+
+                </div>
+
+                <button
+                    type="submit"
+                    id="generateForecastButton"
+                    class="forecast-submit-btn"
+                >
+                    Generate Forecast
+                </button>
+
+            </form>
+
+            <div
+                id="forecastError"
+                class="forecast-error"
+                style="display: none;"
+            ></div>
+
+        </section>
+
+        <!-- ================= FORECAST RESULTS ================= -->
+        <section
+            id="forecastResults"
+            class="forecast-results-section"
+            {% if not initial_forecast or not initial_forecast.success %}
+                style="display: none;"
+            {% endif %}
+        >
+
+            <!-- ================= KPI CARDS ================= -->
+            <div class="forecast-kpi-grid">
+
+                <div class="forecast-kpi-card">
+                    <span>📈</span>
+
+                    <h3>Trend Direction</h3>
+
+                    <h2 id="trendDirection">
+                        {% if initial_forecast and initial_forecast.success %}
+                            {{ initial_forecast.metrics.trend_direction | title }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </h2>
+
+                    <p>Historical KPI direction</p>
+                </div>
+
+                <div class="forecast-kpi-card">
+                    <span>🎯</span>
+
+                    <h3>Confidence Score</h3>
+
+                    <h2 id="confidenceScore">
+                        {% if initial_forecast and initial_forecast.success %}
+                            {{ initial_forecast.metrics.confidence_score }}%
+                        {% else %}
+                            -
+                        {% endif %}
+                    </h2>
+
+                    <p>Estimated model reliability</p>
+                </div>
+
+                <div class="forecast-kpi-card">
+                    <span>📊</span>
+
+                    <h3>Historical Growth</h3>
+
+                    <h2 id="historicalGrowth">
+                        {% if initial_forecast and initial_forecast.success %}
+                            {{ initial_forecast.metrics.historical_growth_rate }}%
+                        {% else %}
+                            -
+                        {% endif %}
+                    </h2>
+
+                    <p>First-to-latest historical change</p>
+                </div>
+
+                <div class="forecast-kpi-card">
+                    <span>⚡</span>
+
+                    <h3>Recent Change</h3>
+
+                    <h2 id="recentChange">
+                        {% if initial_forecast and initial_forecast.success %}
+                            {{ initial_forecast.metrics.recent_change }}%
+                        {% else %}
+                            -
+                        {% endif %}
+                    </h2>
+
+                    <p>Latest monthly movement</p>
+                </div>
+
+                <div class="forecast-kpi-card">
+                    <span>📉</span>
+
+                    <h3>Model R²</h3>
+
+                    <h2 id="r2Score">
+                        {% if initial_forecast and initial_forecast.success %}
+                            {{ initial_forecast.metrics.r2_score }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </h2>
+
+                    <p>Trend fit score</p>
+                </div>
+
+                <div class="forecast-kpi-card">
+                    <span>🧮</span>
+
+                    <h3>Mean Error</h3>
+
+                    <h2 id="maeScore">
+                        {% if initial_forecast and initial_forecast.success %}
+                            {{ initial_forecast.metrics.mae }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </h2>
+
+                    <p>Mean absolute error</p>
+                </div>
+
+            </div>
+
+            <!-- ================= ENTERPRISE FORECAST HEALTH ================= -->
+<section class="forecast-health-section">
+
+    <div class="forecast-health-header">
+
+        <div>
+            <span class="copilot-label">
+                Forecast Health
+            </span>
+
+            <h2>Enterprise Forecast Intelligence</h2>
+
+            <p>
+                Model reliability, trend strength, volatility,
+                and forecast readiness at a glance.
+            </p>
+        </div>
+
+        <span
+            id="modelHealthBadge"
+            class="forecast-health-badge"
+        >
+            Evaluating
+        </span>
+
+    </div>
+
+    <div class="forecast-health-grid">
+
+        <div class="forecast-health-card">
+
+            <div class="forecast-health-icon">
+                🎯
+            </div>
+
+            <div>
+                <span>Accuracy Score</span>
+
+                <strong id="forecastAccuracyScore">
+                    {% if initial_forecast and initial_forecast.success %}
+                        {{ initial_forecast.metrics.confidence_score }}%
+                    {% else %}
+                        -
+                    {% endif %}
+                </strong>
+
+                <p>Validation-based reliability</p>
+            </div>
+
+        </div>
+
+        <div class="forecast-health-card">
+
+            <div class="forecast-health-icon">
+                📈
+            </div>
+
+            <div>
+                <span>Trend Strength</span>
+
+                <strong id="trendStrength">
+                    -
+                </strong>
+
+                <p>Strength of historical movement</p>
+            </div>
+
+        </div>
+
+        <div class="forecast-health-card">
+
+            <div class="forecast-health-icon">
+                〽️
+            </div>
+
+            <div>
+                <span>Volatility Index</span>
+
+                <strong id="volatilityIndex">
+                    -
+                </strong>
+
+                <p>Variation across historical periods</p>
+            </div>
+
+        </div>
+
+        <div class="forecast-health-card">
+
+            <div class="forecast-health-icon">
+                🧠
+            </div>
+
+            <div>
+                <span>Model Health</span>
+
+                <strong id="modelHealthStatus">
+                    -
+                </strong>
+
+                <p>Overall forecasting readiness</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+            <!-- ================= ADVANCED MODEL INTELLIGENCE ================= -->
+<section class="forecast-model-section">
+
+    <div class="forecast-model-header">
+        <div>
+            <span class="copilot-label">
+                Model Intelligence
+            </span>
+
+            <h2>Forecast Model Performance</h2>
+
+            <p>
+                The platform compares multiple forecasting models and
+                automatically selects the most accurate option.
+            </p>
+        </div>
+
+        <span class="summary-badge">
+            Best Model Selected
+        </span>
+    </div>
+
+    <div class="best-model-card">
+
+        <div class="best-model-icon">
+            🏆
+        </div>
+
+        <div class="best-model-details">
+            <span>Selected Forecasting Model</span>
+
+            <h2 id="bestModelName">
+                {% if initial_forecast and initial_forecast.success %}
+                    {{ initial_forecast.best_model_name }}
+                {% else %}
+                    Not available
+                {% endif %}
+            </h2>
+
+            <p>
+                Automatically selected using chronological validation
+                on unseen recent periods.
+            </p>
+        </div>
+
+        <div class="best-model-score">
+            <span>Validation Score</span>
+
+            <strong id="bestModelScore">
+                {% if initial_forecast and initial_forecast.success %}
+                    {{ initial_forecast.metrics.confidence_score }}%
+                {% else %}
+                    -
+                {% endif %}
+            </strong>
+        </div>
+
+    </div>
+
+    <div class="model-metric-grid">
+
+        <div class="model-metric-card">
+            <span>Training Periods</span>
+
+            <strong id="trainSize">
+                {% if initial_forecast and initial_forecast.success %}
+                    {{ initial_forecast.train_size }}
+                {% else %}
+                    -
+                {% endif %}
+            </strong>
+
+            <p>Historical periods used for model training</p>
+        </div>
+
+        <div class="model-metric-card">
+            <span>Validation Periods</span>
+
+            <strong id="testSize">
+                {% if initial_forecast and initial_forecast.success %}
+                    {{ initial_forecast.test_size }}
+                {% else %}
+                    -
+                {% endif %}
+            </strong>
+
+            <p>Recent periods used for accuracy testing</p>
+        </div>
+
+        <div class="model-metric-card">
+            <span>MAE</span>
+
+            <strong id="validationMae">
+                {% if initial_forecast and initial_forecast.success %}
+                    {{ initial_forecast.validation_metrics.mae }}
+                {% else %}
+                    -
+                {% endif %}
+            </strong>
+
+            <p>Average absolute prediction error</p>
+        </div>
+
+        <div class="model-metric-card">
+            <span>RMSE</span>
+
+            <strong id="validationRmse">
+                {% if initial_forecast and initial_forecast.success %}
+                    {{ initial_forecast.validation_metrics.rmse }}
+                {% else %}
+                    -
+                {% endif %}
+            </strong>
+
+            <p>Error measure that penalizes large misses</p>
+        </div>
+
+        <div class="model-metric-card">
+            <span>MAPE</span>
+
+            <strong id="validationMape">
+                {% if initial_forecast and initial_forecast.success %}
+                    {{ initial_forecast.validation_metrics.mape }}%
+                {% else %}
+                    -
+                {% endif %}
+            </strong>
+
+            <p>Average percentage forecasting error</p>
+        </div>
+
+        <div class="model-metric-card">
+            <span>Validation R²</span>
+
+            <strong id="validationR2">
+                {% if initial_forecast and initial_forecast.success %}
+                    {{ initial_forecast.validation_metrics.r2_score }}
+                {% else %}
+                    -
+                {% endif %}
+            </strong>
+
+            <p>Model fit on recent unseen periods</p>
+        </div>
+
+    </div>
+
+</section>
+
+
+            <!-- ================= MODEL COMPARISON LEADERBOARD ================= -->
+            <section class="model-leaderboard-section">
+
+                <div class="model-leaderboard-header">
+
+                    <div>
+                        <span class="copilot-label">
+                            AutoML Comparison
+                        </span>
+
+                        <h2>Forecast Model Leaderboard</h2>
+
+                        <p>
+                            Models are evaluated on recent unseen periods.
+                            The model with the highest validation score is selected automatically.
+                        </p>
+                    </div>
+
+                    <span class="summary-badge">
+                        Chronological Validation
+                    </span>
+
+                </div>
+
+                <div class="model-table-wrapper">
+
+                    <table class="model-leaderboard-table">
+
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Model</th>
+                                <th>Validation Score</th>
+                                <th>MAE</th>
+                                <th>RMSE</th>
+                                <th>MAPE</th>
+                                <th>R²</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="modelLeaderboardBody">
+
+                            {% if initial_forecast and initial_forecast.success %}
+
+                                {% set sorted_models =
+                                    initial_forecast.model_comparison
+                                    | sort(
+                                        attribute="validation_score",
+                                        reverse=true
+                                    )
+                                %}
+
+                                {% for model in sorted_models %}
+
+                                    <tr
+                                        class="
+                                            {% if model.name == initial_forecast.best_model_name %}
+                                                best-model-row
+                                            {% endif %}
+                                        "
+                                    >
+
+                                        <td>
+                                            <span class="model-rank">
+                                                {{ loop.index }}
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <strong>{{ model.name }}</strong>
+                                        </td>
+
+                                        <td>
+                                            {{ model.validation_score }}%
+                                        </td>
+
+                                        <td>
+                                            {{ model.metrics.mae }}
+                                        </td>
+
+                                        <td>
+                                            {{ model.metrics.rmse }}
+                                        </td>
+
+                                        <td>
+                                            {{ model.metrics.mape }}%
+                                        </td>
+
+                                        <td>
+                                            {{ model.metrics.r2_score }}
+                                        </td>
+
+                                        <td>
+                                            {% if model.name == initial_forecast.best_model_name %}
+                                                <span class="model-status selected">
+                                                    Best Model
+                                                </span>
+                                            {% else %}
+                                                <span class="model-status tested">
+                                                    Tested
+                                                </span>
+                                            {% endif %}
+                                        </td>
+
+                                    </tr>
+
+                                {% endfor %}
+
+                            {% endif %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+            <!-- ================= MODEL PERFORMANCE VISUALIZATION ================= -->
+            <section class="model-comparison-chart-section">
+
+    <div class="model-comparison-chart-header">
+
+        <div>
+            <span class="copilot-label">
+                Model Performance
+            </span>
+
+            <h2>Forecast Model Accuracy Comparison</h2>
+
+            <p>
+                Compare validation scores and forecasting errors for all
+                evaluated models.
+            </p>
+        </div>
+
+        <div class="model-chart-controls">
+
+            <button
+                type="button"
+                class="model-chart-button active"
+                data-metric="validation_score"
+            >
+                Validation Score
+            </button>
+
+            <button
+                type="button"
+                class="model-chart-button"
+                data-metric="mae"
+            >
+                MAE
+            </button>
+
+            <button
+                type="button"
+                class="model-chart-button"
+                data-metric="rmse"
+            >
+                RMSE
+            </button>
+
+            <button
+                type="button"
+                class="model-chart-button"
+                data-metric="mape"
+            >
+                MAPE
+            </button>
+
+        </div>
+
+    </div>
+
+    <div id="modelComparisonChart"></div>
+
+    <div class="model-comparison-note">
+
+        <span>ℹ</span>
+
+        <p id="modelComparisonNote">
+            Higher validation scores indicate better performance.
+        </p>
+
+    </div>
+
+</section>
+            
+
+            <!-- ================= FORECAST CHART ================= -->
+            <section class="forecast-chart-section">
+
+                <div class="forecast-chart-header">
+
+                    <div>
+                        <h2>Historical and Forecast Trend</h2>
+
+<p id="forecastChartSubtitle">
+    {% if initial_forecast and initial_forecast.success %}
+        {{ initial_forecast.value_column }}
+        forecast using
+        {{ initial_forecast.date_column }}
+    {% else %}
+        Historical and predicted future values
+    {% endif %}
+</p>
+                    </div>
+
+                    <span class="summary-badge">
+                        Interactive
+                    </span>
+
+                </div>
+
+                <div id="forecastChart"></div>
+
+            </section>
+<!-- ================= EXPLAINABLE AI ================= -->
+<section class="forecast-xai-section">
+
+    <div class="forecast-xai-header">
+
+        <div>
+            <span class="copilot-label">
+                Explainable AI
+            </span>
+
+            <h2>Why Did the AI Choose This Model?</h2>
+
+            <p>
+                Business-friendly explanations of model selection,
+                model behavior, validation performance, forecast
+                uncertainty, and expected business impact.
+            </p>
+        </div>
+
+        <span class="summary-badge">
+            XAI Enabled
+        </span>
+
+    </div>
+
+    <div class="forecast-xai-grid">
+
+        <article class="forecast-xai-card">
+            <div class="forecast-xai-card-icon">
+                🏆
+            </div>
+
+            <div>
+                <h3>Model Selection</h3>
+
+                <p id="xaiModelSelection">
+                    {% if initial_forecast
+                          and initial_forecast.success
+                          and initial_forecast.explainability %}
+                        {{ initial_forecast.explainability.model_selection }}
+                    {% else %}
+                        Generate a forecast to view the model-selection explanation.
+                    {% endif %}
+                </p>
+            </div>
+        </article>
+
+        <article class="forecast-xai-card">
+            <div class="forecast-xai-card-icon">
+                🧠
+            </div>
+
+            <div>
+                <h3>Model Behavior</h3>
+
+                <p id="xaiModelBehavior">
+                    {% if initial_forecast
+                          and initial_forecast.success
+                          and initial_forecast.explainability %}
+                        {{ initial_forecast.explainability.model_behavior }}
+                    {% else %}
+                        Generate a forecast to understand how the selected model works.
+                    {% endif %}
+                </p>
+            </div>
+        </article>
+
+        <article class="forecast-xai-card">
+            <div class="forecast-xai-card-icon">
+                📈
+            </div>
+
+            <div>
+                <h3>Trend Explanation</h3>
+
+                <p id="xaiTrendExplanation">
+                    {% if initial_forecast
+                          and initial_forecast.success
+                          and initial_forecast.explainability %}
+                        {{ initial_forecast.explainability.trend_explanation }}
+                    {% else %}
+                        Generate a forecast to view the trend explanation.
+                    {% endif %}
+                </p>
+            </div>
+        </article>
+
+        <article class="forecast-xai-card">
+            <div class="forecast-xai-card-icon">
+                📐
+            </div>
+
+            <div>
+                <h3>Prediction Interval</h3>
+
+                <p id="xaiIntervalExplanation">
+                    {% if initial_forecast
+                          and initial_forecast.success
+                          and initial_forecast.explainability %}
+                        {{ initial_forecast.explainability.interval_explanation }}
+                    {% else %}
+                        Generate a forecast to understand forecast uncertainty.
+                    {% endif %}
+                </p>
+            </div>
+        </article>
+
+        <article class="forecast-xai-card forecast-xai-card-wide">
+            <div class="forecast-xai-card-icon">
+                💼
+            </div>
+
+            <div>
+                <h3>Business Interpretation</h3>
+
+                <p id="xaiBusinessInterpretation">
+                    {% if initial_forecast
+                          and initial_forecast.success
+                          and initial_forecast.explainability %}
+                        {{ initial_forecast.explainability.business_interpretation }}
+                    {% else %}
+                        Generate a forecast to view the business interpretation.
+                    {% endif %}
+                </p>
+            </div>
+        </article>
+
+    </div>
+
+    <div class="forecast-xai-validation">
+
+        <div class="forecast-xai-validation-header">
+            <div>
+                <h3>Validation Metrics Explained</h3>
+
+                <p>
+                    A plain-language interpretation of MAE, RMSE,
+                    MAPE, R², and forecast confidence.
+                </p>
+            </div>
+        </div>
+
+        <div
+            id="xaiValidationExplanations"
+            class="forecast-xai-validation-list"
+        >
+
+            {% if initial_forecast
+                  and initial_forecast.success
+                  and initial_forecast.explainability %}
+
+                {% for explanation in
+                    initial_forecast.explainability.validation_explanations %}
+
+                    <div class="forecast-xai-validation-item">
+                        <span>✓</span>
+                        <p>{{ explanation }}</p>
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</section>
+            <!-- ================= EXECUTIVE FORECAST INSIGHT ================= -->
+<section class="forecast-executive-insight">
+
+    <div class="forecast-insight-header">
+
+        <div>
+            <span class="copilot-label">
+                Executive Forecast Brief
+            </span>
+
+            <h2>AI Forecast Interpretation</h2>
+
+            <p>
+                A management-ready explanation of the model,
+                expected movement, uncertainty, and business impact.
+            </p>
+        </div>
+
+        <span class="summary-badge">
+            AI Generated
+        </span>
+
+    </div>
+
+    <div class="forecast-insight-layout">
+
+        <div class="forecast-summary-card">
+
+            <h3>Executive Summary</h3>
+
+            <p id="forecastSummary">
+                {% if initial_forecast and initial_forecast.success %}
+                    {{ initial_forecast.summary }}
+                {% else %}
+                    Generate a forecast to view the AI summary.
+                {% endif %}
+            </p>
+
+        </div>
+
+        <div class="forecast-insight-mini-grid">
+
+            <div class="forecast-insight-mini-card">
+
+                <span>Expected Direction</span>
+
+                <strong id="expectedDirection">
+                    {% if initial_forecast and initial_forecast.success %}
+                        {{ initial_forecast.metrics.trend_direction | title }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </strong>
+
+            </div>
+
+            <div class="forecast-insight-mini-card">
+
+                <span>Selected Model</span>
+
+                <strong id="selectedModelInsight">
+                    {% if initial_forecast and initial_forecast.success %}
+                        {{ initial_forecast.best_model_name }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </strong>
+
+            </div>
+
+            <div class="forecast-insight-mini-card">
+
+                <span>Forecast Horizon</span>
+
+                <strong id="forecastHorizonInsight">
+                    {% if initial_forecast and initial_forecast.success %}
+                        {{ initial_forecast.periods }} Months
+                    {% else %}
+                        -
+                    {% endif %}
+                </strong>
+
+            </div>
+
+            <div class="forecast-insight-mini-card">
+
+                <span>Risk Level</span>
+
+                <strong id="forecastRiskLevel">
+                    -
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+            <!-- ================= TABLE AND RISKS ================= -->
+            <section class="forecast-two-column">
+
+                <div class="forecast-table-card">
+
+                    <div class="forecast-panel-header">
+                        <div>
+                            <h2>Future Predictions</h2>
+                            <p>Predicted values for each future month</p>
+                        </div>
+                    </div>
+
+                    <div class="forecast-table-wrapper">
+
+                        <table class="forecast-table">
+
+                            <thead>
+    <tr>
+        <th>Period</th>
+        <th>Forecast Value</th>
+        <th>Lower Bound</th>
+        <th>Upper Bound</th>
+    </tr>
+</thead>
+
+                            <tbody id="forecastTableBody">
+
+                                {% if initial_forecast and initial_forecast.success %}
+
+                                    {% for item in initial_forecast.forecast %}
+
+    <tr>
+        <td>{{ item.period }}</td>
+        <td>{{ item.forecast }}</td>
+        <td>{{ item.lower_bound }}</td>
+        <td>{{ item.upper_bound }}</td>
+    </tr>
+
+{% endfor %}
+                                {% endif %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+                <div class="forecast-risk-card">
+
+                    <div class="forecast-panel-header">
+                        <div>
+                            <h2>⚠ Forecast Risks</h2>
+                            <p>Potential issues detected by the forecast engine</p>
+                        </div>
+                    </div>
+
+                    <div id="forecastRisks">
+
+                        {% if initial_forecast and initial_forecast.success %}
+
+                            {% for risk in initial_forecast.risks %}
+
+                                <div class="forecast-risk-item">
+                                    <span>!</span>
+                                    <p>{{ risk }}</p>
+                                </div>
+
+                            {% endfor %}
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </section>
+<!-- ================= BUSINESS RISK DASHBOARD ================= -->
+<section class="business-risk-section">
+
+    <div class="business-risk-header">
+
+        <div>
+            <span class="copilot-label">
+                Business Risk Intelligence
+            </span>
+
+            <h2>Forecast Risk Assessment</h2>
+
+            <p>
+                Business-oriented risk scores generated from forecast
+                confidence, historical volatility, prediction uncertainty,
+                and trend direction.
+            </p>
+        </div>
+
+        <span
+            id="businessRiskBadge"
+            class="business-risk-badge"
+        >
+            {% if initial_forecast
+                  and initial_forecast.success
+                  and initial_forecast.business_risk %}
+                {{ initial_forecast.business_risk.overall_level }}
+            {% else %}
+                Evaluating
+            {% endif %}
+        </span>
+
+    </div>
+
+    <div class="business-risk-summary">
+
+        <div class="business-risk-score-card">
+
+            <div class="business-risk-score-ring">
+
+                <strong id="businessRiskScore">
+                    {% if initial_forecast
+                          and initial_forecast.success
+                          and initial_forecast.business_risk %}
+                        {{ initial_forecast.business_risk.overall_score }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </strong>
+
+                <span>Risk Score</span>
+
+            </div>
+
+            <div class="business-risk-score-content">
+
+                <span>Overall Business Outlook</span>
+
+                <h3 id="businessRiskLevel">
+                    {% if initial_forecast
+                          and initial_forecast.success
+                          and initial_forecast.business_risk %}
+                        {{ initial_forecast.business_risk.overall_level }}
+                    {% else %}
+                        Not Available
+                    {% endif %}
+                </h3>
+
+                <p>
+                    Lower scores indicate a healthier forecast outlook.
+                    Higher scores require stronger business monitoring.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div
+        id="businessRiskGrid"
+        class="business-risk-grid"
+    >
+
+        {% if initial_forecast
+              and initial_forecast.success
+              and initial_forecast.business_risk %}
+
+            {% for risk in initial_forecast.business_risk.risks %}
+
+                <article class="business-risk-card">
+
+                    <div class="business-risk-card-top">
+
+                        <div>
+                            <span class="business-risk-name">
+                                {{ risk.name }}
+                            </span>
+
+                            <strong>
+                                {{ risk.score }}%
+                            </strong>
+                        </div>
+
+                        <span
+                            class="business-risk-level
+                            {{ risk.level | lower }}"
+                        >
+                            {{ risk.level }}
+                        </span>
+
+                    </div>
+
+                    <div class="business-risk-progress">
+
+                        <div
+                            class="business-risk-progress-bar"
+                            style="width: {{ risk.score }}%;"
+                        ></div>
+
+                    </div>
+
+                    <p>
+                        {{ risk.description }}
+                    </p>
+
+                </article>
+
+            {% endfor %}
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+<!-- ================= EXECUTIVE DECISION SUMMARY ================= -->
+<section class="executive-decision-section">
+
+    <div class="executive-decision-header">
+
+        <div>
+            <span class="copilot-label">
+                Executive Decision Intelligence
+            </span>
+
+            <h2>Management Decision Summary</h2>
+
+            <p>
+                A consolidated view of forecast outlook, business risk,
+                decision confidence, and recommended management actions.
+            </p>
+        </div>
+
+        <div class="executive-decision-actions">
+
+            <span
+                id="executiveDecisionBadge"
+                class="executive-decision-badge"
+            >
+                {% if initial_forecast
+                      and initial_forecast.success
+                      and initial_forecast.executive_summary %}
+                    {{ initial_forecast.executive_summary.headline }}
+                {% else %}
+                    Waiting
+                {% endif %}
+            </span>
+
+            <button
+                type="button"
+                id="copyExecutiveBriefButton"
+                class="copy-executive-brief-btn"
+            >
+                Copy Executive Brief
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- ================= EXECUTIVE KPI CARDS ================= -->
+    <div class="executive-decision-kpi-grid">
+
+        <article class="executive-decision-kpi-card">
+            <span>Decision Confidence</span>
+
+            <strong id="executiveDecisionConfidence">
+                {% if initial_forecast
+                      and initial_forecast.success
+                      and initial_forecast.executive_summary %}
+                    {{ initial_forecast.executive_summary.kpis.decision_confidence }}%
+                {% else %}
+                    -
+                {% endif %}
+            </strong>
+
+            <div class="executive-kpi-progress">
+                <div
+                    id="decisionConfidenceBar"
+                    class="executive-kpi-progress-bar"
+                ></div>
+            </div>
+        </article>
+
+        <article class="executive-decision-kpi-card">
+            <span>Business Health</span>
+
+            <strong id="executiveBusinessHealth">
+                {% if initial_forecast
+                      and initial_forecast.success
+                      and initial_forecast.executive_summary %}
+                    {{ initial_forecast.executive_summary.kpis.business_health_score }}%
+                {% else %}
+                    -
+                {% endif %}
+            </strong>
+
+            <div class="executive-kpi-progress">
+                <div
+                    id="businessHealthBar"
+                    class="executive-kpi-progress-bar"
+                ></div>
+            </div>
+        </article>
+
+        <article class="executive-decision-kpi-card">
+            <span>Forecast Reliability</span>
+
+            <strong id="executiveForecastReliability">
+                {% if initial_forecast
+                      and initial_forecast.success
+                      and initial_forecast.executive_summary %}
+                    {{ initial_forecast.executive_summary.kpis.forecast_reliability }}%
+                {% else %}
+                    -
+                {% endif %}
+            </strong>
+
+            <div class="executive-kpi-progress">
+                <div
+                    id="forecastReliabilityBar"
+                    class="executive-kpi-progress-bar"
+                ></div>
+            </div>
+        </article>
+
+        <article class="executive-decision-kpi-card">
+            <span>AI Readiness</span>
+
+            <strong id="executiveAIReadiness">
+                {% if initial_forecast
+                      and initial_forecast.success
+                      and initial_forecast.executive_summary %}
+                    {{ initial_forecast.executive_summary.kpis.ai_readiness }}%
+                {% else %}
+                    -
+                {% endif %}
+            </strong>
+
+            <div class="executive-kpi-progress">
+                <div
+                    id="aiReadinessBar"
+                    class="executive-kpi-progress-bar"
+                ></div>
+            </div>
+        </article>
+
+    </div>
+
+    <div class="executive-decision-layout">
+
+        <div class="executive-overview-card">
+
+            <span class="executive-card-label">
+                Executive Overview
+            </span>
+
+            <h3>Forecast Overview</h3>
+
+            <p id="executiveOverview">
+                {% if initial_forecast
+                      and initial_forecast.success
+                      and initial_forecast.executive_summary %}
+                    {{ initial_forecast.executive_summary.overview }}
+                {% else %}
+                    Generate a forecast to view the executive summary.
+                {% endif %}
+            </p>
+
+            <h3>Forecast Outlook</h3>
+
+            <p id="executiveForecastOutlook">
+                {% if initial_forecast
+                      and initial_forecast.success
+                      and initial_forecast.executive_summary %}
+                    {{ initial_forecast.executive_summary.forecast_outlook }}
+                {% else %}
+                    No forecast outlook is currently available.
+                {% endif %}
+            </p>
+
+            <h3>Strategic Conclusion</h3>
+
+            <p id="executiveStrategicConclusion">
+                {% if initial_forecast
+                      and initial_forecast.success
+                      and initial_forecast.executive_summary %}
+                    {{ initial_forecast.executive_summary.strategic_conclusion }}
+                {% else %}
+                    No strategic conclusion is currently available.
+                {% endif %}
+            </p>
+
+        </div>
+
+        <div class="executive-priority-column">
+
+            <div class="executive-priority-card">
+
+                <h3>⚠ Top Business Risks</h3>
+
+                <div id="executiveTopRisks">
+
+                    {% if initial_forecast
+                          and initial_forecast.success
+                          and initial_forecast.executive_summary %}
+
+                        {% for risk in
+                            initial_forecast.executive_summary.top_risks %}
+
+                            <div class="executive-risk-item">
+                                <div>
+                                    <strong>{{ risk.name }}</strong>
+                                    <p>{{ risk.description }}</p>
+                                </div>
+
+                                <span>
+                                    {{ risk.level }}
+                                    ·
+                                    {{ risk.score }}%
+                                </span>
+                            </div>
+
+                        {% endfor %}
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <div class="executive-priority-card">
+
+                <h3>💡 Priority Recommendations</h3>
+
+                <div id="executiveTopRecommendations">
+
+                    {% if initial_forecast
+                          and initial_forecast.success
+                          and initial_forecast.executive_summary %}
+
+                        {% for recommendation in
+                            initial_forecast.executive_summary.top_recommendations %}
+
+                            <div class="executive-recommendation-item">
+                                <div>
+                                    <strong>{{ recommendation.title }}</strong>
+                                    <p>{{ recommendation.action }}</p>
+                                </div>
+
+                                <span>
+                                    {{ recommendation.priority }}
+                                </span>
+                            </div>
+
+                        {% endfor %}
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <textarea
+        id="executiveCopyText"
+        class="executive-copy-text"
+        readonly
+    >{% if initial_forecast
+          and initial_forecast.success
+          and initial_forecast.executive_summary %}{{ initial_forecast.executive_summary.copyable_brief }}{% endif %}</textarea>
+
+    <div
+        id="executiveCopyMessage"
+        class="executive-copy-message"
+        style="display: none;"
+    >
+        Executive brief copied successfully.
+    </div>
+
+</section>
+
+<!-- ================= AI BUSINESS RECOMMENDATIONS ================= -->
+<section class="recommendation-dashboard">
+
+    <div class="recommendation-header">
+
+        <div>
+            <span class="copilot-label">
+                AI Business Advisor
+            </span>
+
+            <h2>Executive Recommendations</h2>
+
+            <p>
+                Prioritized business actions generated from forecast
+                trends, validation confidence, and business-risk signals.
+            </p>
+        </div>
+
+        <span
+            id="overallActionBadge"
+            class="recommendation-overall-badge"
+        >
+            {% if initial_forecast
+                  and initial_forecast.success
+                  and initial_forecast.ai_recommendations %}
+                {{ initial_forecast.ai_recommendations.overall_action_level }}
+            {% else %}
+                Waiting
+            {% endif %}
+        </span>
+
+    </div>
+
+    <div class="recommendation-summary-grid">
+
+        <div class="recommendation-summary-card">
+            <span>Total Recommendations</span>
+
+            <strong id="totalRecommendationCount">
+                {% if initial_forecast
+                      and initial_forecast.success
+                      and initial_forecast.ai_recommendations %}
+                    {{ initial_forecast.ai_recommendations.total_recommendations }}
+                {% else %}
+                    0
+                {% endif %}
+            </strong>
+        </div>
+
+        <div class="recommendation-summary-card high">
+            <span>High Priority</span>
+
+            <strong id="highRecommendationCount">
+                {% if initial_forecast
+                      and initial_forecast.success
+                      and initial_forecast.ai_recommendations %}
+                    {{ initial_forecast.ai_recommendations.priority_summary.high }}
+                {% else %}
+                    0
+                {% endif %}
+            </strong>
+        </div>
+
+        <div class="recommendation-summary-card medium">
+            <span>Medium Priority</span>
+
+            <strong id="mediumRecommendationCount">
+                {% if initial_forecast
+                      and initial_forecast.success
+                      and initial_forecast.ai_recommendations %}
+                    {{ initial_forecast.ai_recommendations.priority_summary.medium }}
+                {% else %}
+                    0
+                {% endif %}
+            </strong>
+        </div>
+
+        <div class="recommendation-summary-card low">
+            <span>Low Priority</span>
+
+            <strong id="lowRecommendationCount">
+                {% if initial_forecast
+                      and initial_forecast.success
+                      and initial_forecast.ai_recommendations %}
+                    {{ initial_forecast.ai_recommendations.priority_summary.low }}
+                {% else %}
+                    0
+                {% endif %}
+            </strong>
+        </div>
+
+    </div>
+
+    <div
+        id="recommendationCards"
+        class="recommendation-grid"
+    >
+
+        {% if initial_forecast
+              and initial_forecast.success
+              and initial_forecast.ai_recommendations %}
+
+            {% for recommendation in
+                initial_forecast.ai_recommendations.recommendations %}
+
+                <article class="recommendation-card">
+
+                    <div class="recommendation-card-header">
+
+                        <div>
+                            <span class="recommendation-category">
+                                {{ recommendation.category }}
+                            </span>
+
+                            <h3>
+                                {{ recommendation.title }}
+                            </h3>
+                        </div>
+
+                        <span class="recommendation-priority
+                            {{ recommendation.priority | lower }}">
+                            {{ recommendation.priority }}
+                        </span>
+
+                    </div>
+
+                    <div class="recommendation-body">
+
+                        <div class="recommendation-detail">
+                            <span>Recommended Action</span>
+                            <p>{{ recommendation.action }}</p>
+                        </div>
+
+                        <div class="recommendation-detail">
+                            <span>Rationale</span>
+                            <p>{{ recommendation.rationale }}</p>
+                        </div>
+
+                        <div class="recommendation-detail">
+                            <span>Expected Impact</span>
+                            <p>{{ recommendation.expected_impact }}</p>
+                        </div>
+
+                    </div>
+
+                    <div class="recommendation-footer">
+
+                        <span>
+                            📅 {{ recommendation.timeline }}
+                        </span>
+
+                        <span>
+                            Confidence:
+                            {{ recommendation.confidence }}%
+                        </span>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        {% endif %}
+
+    </div>
+
+</section>
+            <!-- ================= RECOMMENDATIONS ================= -->
+            <section class="forecast-recommendation-card">
+
+                <div class="forecast-panel-header">
+                    <div>
+                        <h2>💡 AI Forecast Recommendations</h2>
+                        <p>
+                            Recommended actions based on the trend and confidence score
+                        </p>
+                    </div>
+                </div>
+
+                <div
+                    id="forecastRecommendations"
+                    class="forecast-recommendation-grid"
+                >
+
+                    {% if initial_forecast and initial_forecast.success %}
+
+                        {% for recommendation in initial_forecast.recommendations %}
+
+                            <div class="forecast-recommendation-item">
+                                <span>→</span>
+                                <p>{{ recommendation }}</p>
+                            </div>
+
+                        {% endfor %}
+
+                    {% endif %}
+
+                </div>
+
+            </section>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script>
+const initialForecast =
+    {{ initial_forecast | tojson if initial_forecast else 'null' }};
+    
+
+const forecastForm =
+    document.getElementById("forecastForm");
+
+const dateColumn =
+    document.getElementById("dateColumn");
+
+const valueColumn =
+    document.getElementById("valueColumn");
+
+const forecastPeriods =
+    document.getElementById("forecastPeriods");
+
+const generateForecastButton =
+    document.getElementById("generateForecastButton");
+
+const forecastResults =
+    document.getElementById("forecastResults");
+
+const forecastError =
+    document.getElementById("forecastError");
+
+const modelChartButtons =
+    document.querySelectorAll(
+        ".model-chart-button"
+    );
+
+let latestForecastResult =
+    initialForecast &&
+    initialForecast.success
+        ? initialForecast
+        : null;
+
+
+function formatForecastNumber(value) {
+    const numericValue = Number(value);
+
+    if (Number.isNaN(numericValue)) {
+        return value;
+    }
+
+    return numericValue.toLocaleString(
+        undefined,
+        {
+            maximumFractionDigits: 2
+        }
+    );
+}
+
+
+function renderForecastChart(result) {
+    const historicalPeriods =
+        result.historical.map(item => item.period);
+
+    const historicalValues =
+        result.historical.map(item => item.value);
+
+    const fittedValues =
+        result.historical.map(item => item.fitted_value);
+
+    const forecastPeriodsList =
+        result.forecast.map(item => item.period);
+
+    const forecastValues =
+        result.forecast.map(item => item.forecast);
+
+    const lowerBounds =
+        result.forecast.map(item => item.lower_bound);
+
+    const upperBounds =
+        result.forecast.map(item => item.upper_bound);
+
+    const historicalTrace = {
+        x: historicalPeriods,
+        y: historicalValues,
+        type: "scatter",
+        mode: "lines+markers",
+        name: "Historical",
+        hovertemplate:
+            "<b>%{x}</b><br>" +
+            "Historical: %{y:,.2f}" +
+            "<extra></extra>"
+    };
+
+    const fittedTrace = {
+        x: historicalPeriods,
+        y: fittedValues,
+        type: "scatter",
+        mode: "lines",
+        name: "Fitted Trend",
+        line: {
+            dash: "dot",
+            width: 2
+        },
+        hovertemplate:
+            "<b>%{x}</b><br>" +
+            "Fitted: %{y:,.2f}" +
+            "<extra></extra>"
+    };
+
+    const upperBoundTrace = {
+        x: forecastPeriodsList,
+        y: upperBounds,
+        type: "scatter",
+        mode: "lines",
+        name: "Upper Bound",
+        line: {
+            width: 0
+        },
+        hovertemplate:
+            "<b>%{x}</b><br>" +
+            "Upper Bound: %{y:,.2f}" +
+            "<extra></extra>",
+        showlegend: false
+    };
+
+    const lowerBoundTrace = {
+        x: forecastPeriodsList,
+        y: lowerBounds,
+        type: "scatter",
+        mode: "lines",
+        name: "95% Prediction Interval",
+        line: {
+            width: 0
+        },
+        fill: "tonexty",
+        fillcolor: "rgba(37, 99, 235, 0.14)",
+        hovertemplate:
+            "<b>%{x}</b><br>" +
+            "Lower Bound: %{y:,.2f}" +
+            "<extra></extra>"
+    };
+
+    const forecastTrace = {
+        x: forecastPeriodsList,
+        y: forecastValues,
+        type: "scatter",
+        mode: "lines+markers",
+        name: "Forecast",
+        line: {
+            dash: "dash",
+            width: 3
+        },
+        marker: {
+            size: 8
+        },
+        customdata: forecastPeriodsList.map(
+            (period, index) => [
+                lowerBounds[index],
+                upperBounds[index]
+            ]
+        ),
+        hovertemplate:
+            "<b>%{x}</b><br>" +
+            "Forecast: %{y:,.2f}<br>" +
+            "Lower: %{customdata[0]:,.2f}<br>" +
+            "Upper: %{customdata[1]:,.2f}" +
+            "<extra></extra>"
+    };
+
+const layout = {
+    template: "plotly_white",
+    height: 560,
+
+    margin: {
+        l: 80,
+        r: 35,
+        t: 105,
+        b: 135
+    },
+
+    /* Remove duplicate chart title */
+    title: {
+        text: ""
+    },
+
+    xaxis: {
+        title: {
+            text: "Reporting Period",
+            standoff: 28
+        },
+        showgrid: false,
+        tickangle: -35,
+        automargin: true,
+
+        rangeslider: {
+            visible: true,
+            thickness: 0.10
+        }
+    },
+
+    yaxis: {
+        title: {
+            text: result.value_column,
+            standoff: 15
+        },
+        gridcolor: "#e2e8f0",
+        zeroline: false,
+        tickformat: ",.2f",
+        automargin: true
+    },
+
+    legend: {
+        orientation: "h",
+        x: 0,
+        xanchor: "left",
+        y: 1.08,
+        yanchor: "bottom",
+        bgcolor: "rgba(255,255,255,0.90)",
+        bordercolor: "#e2e8f0",
+        borderwidth: 1,
+        font: {
+            size: 12
+        }
+    },
+
+    hovermode: "x unified",
+
+    transition: {
+        duration: 500,
+        easing: "cubic-in-out"
+    },
+
+    annotations: [
+        {
+            xref: "paper",
+            yref: "paper",
+            x: 1,
+            y: -0.34,
+            xanchor: "right",
+            yanchor: "top",
+            showarrow: false,
+            text:
+                "Shaded area represents the 95% prediction interval.",
+            font: {
+                size: 11,
+                color: "#64748b"
+            }
+        }
+    ]
+};
+
+    Plotly.newPlot(
+        "forecastChart",
+        [
+            historicalTrace,
+            fittedTrace,
+            upperBoundTrace,
+            lowerBoundTrace,
+            forecastTrace
+        ],
+        layout,
+        {
+            responsive: true,
+            displaylogo: false,
+            modeBarButtonsToRemove: [
+                "lasso2d",
+                "select2d"
+            ]
+        }
+    );
+}
+
+function updateForecastKpis(result) {
+    document.getElementById("trendDirection").textContent =
+        result.metrics.trend_direction
+            .charAt(0)
+            .toUpperCase()
+        + result.metrics.trend_direction.slice(1);
+
+    document.getElementById("confidenceScore").textContent =
+        result.metrics.confidence_score + "%";
+
+    document.getElementById("historicalGrowth").textContent =
+        result.metrics.historical_growth_rate + "%";
+
+    document.getElementById("recentChange").textContent =
+        result.metrics.recent_change + "%";
+
+    document.getElementById("r2Score").textContent =
+        result.metrics.r2_score;
+
+    document.getElementById("maeScore").textContent =
+        formatForecastNumber(result.metrics.mae);
+
+    document.getElementById("forecastChartSubtitle").textContent =
+        result.value_column
+        + " forecast using "
+        + result.date_column;
+
+    document.getElementById("forecastSummary").textContent =
+        result.summary;
+}
+
+
+function updateForecastTable(result) {
+    const tableBody =
+        document.getElementById(
+            "forecastTableBody"
+        );
+
+    if (!tableBody) {
+        return;
+    }
+
+    tableBody.innerHTML = "";
+
+    result.forecast.forEach(item => {
+        const row =
+            document.createElement("tr");
+
+        const periodCell =
+            document.createElement("td");
+
+        const forecastCell =
+            document.createElement("td");
+
+        const lowerCell =
+            document.createElement("td");
+
+        const upperCell =
+            document.createElement("td");
+
+        periodCell.textContent =
+            item.period;
+
+        forecastCell.textContent =
+            formatForecastNumber(
+                item.forecast
+            );
+
+        lowerCell.textContent =
+            formatForecastNumber(
+                item.lower_bound
+            );
+
+        upperCell.textContent =
+            formatForecastNumber(
+                item.upper_bound
+            );
+
+        row.appendChild(periodCell);
+        row.appendChild(forecastCell);
+        row.appendChild(lowerCell);
+        row.appendChild(upperCell);
+
+        tableBody.appendChild(row);
+    });
+}
+
+
+function updateForecastRisks(result) {
+    const risksContainer =
+        document.getElementById("forecastRisks");
+
+    risksContainer.innerHTML = "";
+
+    result.risks.forEach(risk => {
+        const item =
+            document.createElement("div");
+
+        item.className =
+            "forecast-risk-item";
+
+        const icon =
+            document.createElement("span");
+
+        icon.textContent = "!";
+
+        const paragraph =
+            document.createElement("p");
+
+        paragraph.textContent = risk;
+
+        item.appendChild(icon);
+        item.appendChild(paragraph);
+
+        risksContainer.appendChild(item);
+    });
+}
+
+
+function updateForecastRecommendations(result) {
+    const recommendationsContainer =
+        document.getElementById(
+            "forecastRecommendations"
+        );
+
+    recommendationsContainer.innerHTML = "";
+
+    result.recommendations.forEach(
+        recommendation => {
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "forecast-recommendation-item";
+
+            const icon =
+                document.createElement("span");
+
+            icon.textContent = "→";
+
+            const paragraph =
+                document.createElement("p");
+
+            paragraph.textContent =
+                recommendation;
+
+            item.appendChild(icon);
+            item.appendChild(paragraph);
+
+            recommendationsContainer.appendChild(
+                item
+            );
+        }
+    );
+}
+
+function updateModelIntelligence(result) {
+    const validationMetrics =
+        result.validation_metrics || {};
+
+    document.getElementById(
+        "bestModelName"
+    ).textContent =
+        result.best_model_name ||
+        "Not available";
+
+    document.getElementById(
+        "bestModelScore"
+    ).textContent =
+        (
+            result.metrics.confidence_score ?? 0
+        ) + "%";
+
+    document.getElementById(
+        "trainSize"
+    ).textContent =
+        result.train_size ?? "-";
+
+    document.getElementById(
+        "testSize"
+    ).textContent =
+        result.test_size ?? "-";
+
+    document.getElementById(
+        "validationMae"
+    ).textContent =
+        formatForecastNumber(
+            validationMetrics.mae ?? 0
+        );
+
+    document.getElementById(
+        "validationRmse"
+    ).textContent =
+        formatForecastNumber(
+            validationMetrics.rmse ?? 0
+        );
+
+    document.getElementById(
+        "validationMape"
+    ).textContent =
+        (
+            validationMetrics.mape ?? 0
+        ) + "%";
+
+    document.getElementById(
+        "validationR2"
+    ).textContent =
+        validationMetrics.r2_score ?? 0;
+}
+
+
+function updateModelLeaderboard(result) {
+    const tableBody =
+        document.getElementById(
+            "modelLeaderboardBody"
+        );
+
+    if (!tableBody) {
+        return;
+    }
+
+    tableBody.innerHTML = "";
+
+    const models = Array.isArray(
+        result.model_comparison
+    )
+        ? [...result.model_comparison]
+        : [];
+
+    models.sort(
+        (firstModel, secondModel) =>
+            (
+                secondModel.validation_score || 0
+            ) -
+            (
+                firstModel.validation_score || 0
+            )
+    );
+
+    models.forEach((model, index) => {
+        const row =
+            document.createElement("tr");
+
+        const isBestModel =
+            model.name ===
+            result.best_model_name;
+
+        if (isBestModel) {
+            row.classList.add(
+                "best-model-row"
+            );
+        }
+
+        const metrics =
+            model.metrics || {};
+
+        const rankCell =
+            document.createElement("td");
+
+        const rankBadge =
+            document.createElement("span");
+
+        rankBadge.className =
+            "model-rank";
+
+        rankBadge.textContent =
+            index + 1;
+
+        rankCell.appendChild(
+            rankBadge
+        );
+
+        const modelCell =
+            document.createElement("td");
+
+        const modelName =
+            document.createElement("strong");
+
+        modelName.textContent =
+            model.name ||
+            "Unknown Model";
+
+        modelCell.appendChild(
+            modelName
+        );
+
+        const scoreCell =
+            document.createElement("td");
+
+        scoreCell.textContent =
+            formatForecastNumber(
+                model.validation_score || 0
+            ) + "%";
+
+        const maeCell =
+            document.createElement("td");
+
+        maeCell.textContent =
+            formatForecastNumber(
+                metrics.mae || 0
+            );
+
+        const rmseCell =
+            document.createElement("td");
+
+        rmseCell.textContent =
+            formatForecastNumber(
+                metrics.rmse || 0
+            );
+
+        const mapeCell =
+            document.createElement("td");
+
+        mapeCell.textContent =
+            formatForecastNumber(
+                metrics.mape || 0
+            ) + "%";
+
+        const r2Cell =
+            document.createElement("td");
+
+        r2Cell.textContent =
+            metrics.r2_score ?? 0;
+
+        const statusCell =
+            document.createElement("td");
+
+        const statusBadge =
+            document.createElement("span");
+
+        statusBadge.className =
+            isBestModel
+                ? "model-status selected"
+                : "model-status tested";
+
+        statusBadge.textContent =
+            isBestModel
+                ? "Best Model"
+                : "Tested";
+
+        statusCell.appendChild(
+            statusBadge
+        );
+
+        row.appendChild(rankCell);
+        row.appendChild(modelCell);
+        row.appendChild(scoreCell);
+        row.appendChild(maeCell);
+        row.appendChild(rmseCell);
+        row.appendChild(mapeCell);
+        row.appendChild(r2Cell);
+        row.appendChild(statusCell);
+
+        tableBody.appendChild(row);
+    });
+}
+
+function calculateForecastVolatility(result) {
+    const historicalValues =
+        Array.isArray(result.historical)
+            ? result.historical
+                .map(item => Number(item.value))
+                .filter(value => !Number.isNaN(value))
+            : [];
+
+    if (historicalValues.length < 2) {
+        return 0;
+    }
+
+    const average =
+        historicalValues.reduce(
+            (total, value) => total + value,
+            0
+        ) / historicalValues.length;
+
+    if (average === 0) {
+        return 0;
+    }
+
+    const variance =
+        historicalValues.reduce(
+            (total, value) =>
+                total + Math.pow(value - average, 2),
+            0
+        ) / historicalValues.length;
+
+    const standardDeviation =
+        Math.sqrt(variance);
+
+    return Math.abs(
+        standardDeviation / average * 100
+    );
+}
+
+
+function getTrendStrength(result) {
+    const growthRate =
+        Math.abs(
+            Number(
+                result.metrics
+                    ?.historical_growth_rate || 0
+            )
+        );
+
+    if (growthRate >= 40) {
+        return "Very Strong";
+    }
+
+    if (growthRate >= 20) {
+        return "Strong";
+    }
+
+    if (growthRate >= 8) {
+        return "Moderate";
+    }
+
+    return "Weak";
+}
+
+
+function getModelHealth(result) {
+    const confidence =
+        Number(
+            result.metrics
+                ?.confidence_score || 0
+        );
+
+    const mape =
+        Number(
+            result.validation_metrics
+                ?.mape || 0
+        );
+
+    if (
+        confidence >= 80
+        && mape <= 15
+    ) {
+        return {
+            label: "Excellent",
+            className: "excellent"
+        };
+    }
+
+    if (
+        confidence >= 65
+        && mape <= 25
+    ) {
+        return {
+            label: "Good",
+            className: "good"
+        };
+    }
+
+    if (
+        confidence >= 45
+        && mape <= 40
+    ) {
+        return {
+            label: "Moderate",
+            className: "moderate"
+        };
+    }
+
+    return {
+        label: "Needs Review",
+        className: "poor"
+    };
+}
+
+
+function getForecastRiskLevel(result) {
+    const confidence =
+        Number(
+            result.metrics
+                ?.confidence_score || 0
+        );
+
+    const volatility =
+        calculateForecastVolatility(result);
+
+    if (
+        confidence < 45
+        || volatility > 60
+    ) {
+        return "High";
+    }
+
+    if (
+        confidence < 70
+        || volatility > 30
+    ) {
+        return "Medium";
+    }
+
+    return "Low";
+}
+
+
+function updateEnterpriseForecastHealth(result) {
+    const confidence =
+        Number(
+            result.metrics
+                ?.confidence_score || 0
+        );
+
+    const volatility =
+        calculateForecastVolatility(result);
+
+    const trendStrength =
+        getTrendStrength(result);
+
+    const modelHealth =
+        getModelHealth(result);
+
+    const riskLevel =
+        getForecastRiskLevel(result);
+
+    document.getElementById(
+        "forecastAccuracyScore"
+    ).textContent =
+        formatForecastNumber(
+            confidence
+        ) + "%";
+
+    document.getElementById(
+        "trendStrength"
+    ).textContent =
+        trendStrength;
+
+    document.getElementById(
+        "volatilityIndex"
+    ).textContent =
+        formatForecastNumber(
+            volatility
+        ) + "%";
+
+    document.getElementById(
+        "modelHealthStatus"
+    ).textContent =
+        modelHealth.label;
+
+    const healthBadge =
+        document.getElementById(
+            "modelHealthBadge"
+        );
+
+    healthBadge.textContent =
+        modelHealth.label;
+
+    healthBadge.className =
+        "forecast-health-badge "
+        + modelHealth.className;
+
+    document.getElementById(
+        "expectedDirection"
+    ).textContent =
+        result.metrics
+            ?.trend_direction
+            ? result.metrics.trend_direction
+                .charAt(0)
+                .toUpperCase()
+                + result.metrics
+                    .trend_direction
+                    .slice(1)
+            : "-";
+
+    document.getElementById(
+        "selectedModelInsight"
+    ).textContent =
+        result.best_model_name || "-";
+
+    document.getElementById(
+        "forecastHorizonInsight"
+    ).textContent =
+        (result.periods || 0)
+        + " Months";
+
+    document.getElementById(
+        "forecastRiskLevel"
+    ).textContent =
+        riskLevel;
+}
+
+
+function getSortedModelComparison(result) {
+    const models = Array.isArray(
+        result.model_comparison
+    )
+        ? [...result.model_comparison]
+        : [];
+
+    return models.sort(
+        (firstModel, secondModel) =>
+            (
+                secondModel.validation_score || 0
+            ) -
+            (
+                firstModel.validation_score || 0
+            )
+    );
+}
+
+
+function renderModelComparisonChart(
+    result,
+    metric = "validation_score"
+) {
+    const chartContainer =
+        document.getElementById(
+            "modelComparisonChart"
+        );
+
+    if (!chartContainer) {
+        return;
+    }
+
+    const models =
+        getSortedModelComparison(result);
+
+    if (!models.length) {
+        chartContainer.innerHTML =
+            "<p class='model-chart-empty'>No model comparison data is available.</p>";
+
+        return;
+    }
+
+    const modelNames =
+        models.map(model => model.name);
+
+    let values = [];
+    let chartTitle = "";
+    let axisTitle = "";
+    let noteText = "";
+    let valueSuffix = "";
+
+    if (metric === "mae") {
+        values = models.map(
+            model =>
+                Number(
+                    model.metrics?.mae || 0
+                )
+        );
+
+        chartTitle =
+            "Mean Absolute Error by Model";
+
+        axisTitle =
+            "MAE — Lower Is Better";
+
+        noteText =
+            "Lower MAE means the model has a smaller average prediction error.";
+
+    } else if (metric === "rmse") {
+        values = models.map(
+            model =>
+                Number(
+                    model.metrics?.rmse || 0
+                )
+        );
+
+        chartTitle =
+            "Root Mean Squared Error by Model";
+
+        axisTitle =
+            "RMSE — Lower Is Better";
+
+        noteText =
+            "Lower RMSE indicates fewer large forecasting errors.";
+
+    } else if (metric === "mape") {
+        values = models.map(
+            model =>
+                Number(
+                    model.metrics?.mape || 0
+                )
+        );
+
+        chartTitle =
+            "Mean Absolute Percentage Error by Model";
+
+        axisTitle =
+            "MAPE (%) — Lower Is Better";
+
+        noteText =
+            "Lower MAPE indicates a smaller average percentage error.";
+
+        valueSuffix = "%";
+
+    } else {
+        values = models.map(
+            model =>
+                Number(
+                    model.validation_score || 0
+                )
+        );
+
+        chartTitle =
+            "Validation Score by Model";
+
+        axisTitle =
+            "Validation Score (%) — Higher Is Better";
+
+        noteText =
+            "Higher validation scores indicate better performance on unseen recent periods.";
+
+        valueSuffix = "%";
+    }
+
+    const barTrace = {
+        x: values,
+        y: modelNames,
+        type: "bar",
+        orientation: "h",
+
+        text: values.map(
+            value =>
+                formatForecastNumber(value)
+                + valueSuffix
+        ),
+
+        textposition: "auto",
+
+        customdata: models.map(
+            model => [
+                model.validation_score || 0,
+                model.metrics?.mae || 0,
+                model.metrics?.rmse || 0,
+                model.metrics?.mape || 0,
+                model.metrics?.r2_score || 0,
+                model.name ===
+                    result.best_model_name
+                    ? "Best Model"
+                    : "Tested"
+            ]
+        ),
+
+        hovertemplate:
+            "<b>%{y}</b><br>" +
+            "Displayed Value: %{x:,.2f}" +
+            valueSuffix +
+            "<br>Validation Score: %{customdata[0]:,.2f}%" +
+            "<br>MAE: %{customdata[1]:,.2f}" +
+            "<br>RMSE: %{customdata[2]:,.2f}" +
+            "<br>MAPE: %{customdata[3]:,.2f}%" +
+            "<br>R²: %{customdata[4]:,.4f}" +
+            "<br>Status: %{customdata[5]}" +
+            "<extra></extra>"
+    };
+
+    const layout = {
+        template: "plotly_white",
+        height: Math.max(
+            390,
+            models.length * 62
+        ),
+
+        margin: {
+            l: 230,
+            r: 50,
+            t: 70,
+            b: 70
+        },
+
+        title: {
+            text: chartTitle,
+            x: 0.02,
+            xanchor: "left"
+        },
+
+        xaxis: {
+            title: axisTitle,
+            gridcolor: "#e2e8f0",
+            zeroline: false,
+            automargin: true
+        },
+
+        yaxis: {
+            autorange: "reversed",
+            automargin: true
+        },
+
+        showlegend: false,
+
+        bargap: 0.32
+    };
+
+    Plotly.react(
+        chartContainer,
+        [barTrace],
+        layout,
+        {
+            responsive: true,
+            displaylogo: false,
+            modeBarButtonsToRemove: [
+                "lasso2d",
+                "select2d"
+            ]
+        }
+    );
+
+    const note =
+        document.getElementById(
+            "modelComparisonNote"
+        );
+
+    if (note) {
+        note.textContent =
+            noteText;
+    }
+}
+
+
+function setActiveModelChartButton(
+    selectedButton
+) {
+    modelChartButtons.forEach(
+        button => {
+            button.classList.remove(
+                "active"
+            );
+        }
+    );
+
+    selectedButton.classList.add(
+        "active"
+    );
+}
+
+
+modelChartButtons.forEach(button => {
+    button.addEventListener(
+        "click",
+        function () {
+            if (!latestForecastResult) {
+                return;
+            }
+
+            setActiveModelChartButton(
+                button
+            );
+
+            renderModelComparisonChart(
+                latestForecastResult,
+                button.dataset.metric
+            );
+        }
+    );
+});
+
+function updateExplainableAI(result) {
+    const explainability =
+        result.explainability || {};
+
+    const setText = (
+        elementId,
+        value,
+        fallback
+    ) => {
+        const element =
+            document.getElementById(
+                elementId
+            );
+
+        if (!element) {
+            return;
+        }
+
+        element.textContent =
+            value || fallback;
+    };
+
+    setText(
+        "xaiModelSelection",
+        explainability.model_selection,
+        "No model-selection explanation is available."
+    );
+
+    setText(
+        "xaiModelBehavior",
+        explainability.model_behavior,
+        "No model-behavior explanation is available."
+    );
+
+    setText(
+        "xaiTrendExplanation",
+        explainability.trend_explanation,
+        "No trend explanation is available."
+    );
+
+    setText(
+        "xaiIntervalExplanation",
+        explainability.interval_explanation,
+        "No prediction-interval explanation is available."
+    );
+
+    setText(
+        "xaiBusinessInterpretation",
+        explainability.business_interpretation,
+        "No business interpretation is available."
+    );
+
+    const validationContainer =
+        document.getElementById(
+            "xaiValidationExplanations"
+        );
+
+    if (!validationContainer) {
+        return;
+    }
+
+    validationContainer.innerHTML = "";
+
+    const explanations =
+        Array.isArray(
+            explainability.validation_explanations
+        )
+            ? explainability.validation_explanations
+            : [];
+
+    if (!explanations.length) {
+        const emptyMessage =
+            document.createElement("p");
+
+        emptyMessage.className =
+            "forecast-xai-empty";
+
+        emptyMessage.textContent =
+            "No validation explanations are available.";
+
+        validationContainer.appendChild(
+            emptyMessage
+        );
+
+        return;
+    }
+
+    explanations.forEach(explanation => {
+        const item =
+            document.createElement("div");
+
+        item.className =
+            "forecast-xai-validation-item";
+
+        const icon =
+            document.createElement("span");
+
+        icon.textContent = "✓";
+
+        const paragraph =
+            document.createElement("p");
+
+        paragraph.textContent =
+            explanation;
+
+        item.appendChild(icon);
+        item.appendChild(paragraph);
+
+        validationContainer.appendChild(
+            item
+        );
+    });
+}
+function updateBusinessRiskDashboard(result) {
+    const businessRisk =
+        result.business_risk || {};
+
+    const overallScore =
+        Number(
+            businessRisk.overall_score || 0
+        );
+
+    const overallLevel =
+        businessRisk.overall_level ||
+        "Not Available";
+
+    const scoreElement =
+        document.getElementById(
+            "businessRiskScore"
+        );
+
+    const levelElement =
+        document.getElementById(
+            "businessRiskLevel"
+        );
+
+    const badgeElement =
+        document.getElementById(
+            "businessRiskBadge"
+        );
+
+    if (scoreElement) {
+        scoreElement.textContent =
+            formatForecastNumber(
+                overallScore
+            );
+    }
+
+    if (levelElement) {
+        levelElement.textContent =
+            overallLevel;
+    }
+
+    if (badgeElement) {
+        badgeElement.textContent =
+            overallLevel;
+
+        badgeElement.className =
+            "business-risk-badge "
+            + overallLevel
+                .toLowerCase()
+                .replaceAll(" ", "-");
+    }
+
+    const grid =
+        document.getElementById(
+            "businessRiskGrid"
+        );
+
+    if (!grid) {
+        return;
+    }
+
+    grid.innerHTML = "";
+
+    const risks =
+        Array.isArray(
+            businessRisk.risks
+        )
+            ? businessRisk.risks
+            : [];
+
+    if (!risks.length) {
+        const emptyMessage =
+            document.createElement("p");
+
+        emptyMessage.className =
+            "business-risk-empty";
+
+        emptyMessage.textContent =
+            "No business risk data is available.";
+
+        grid.appendChild(
+            emptyMessage
+        );
+
+        return;
+    }
+
+    risks.forEach(risk => {
+        const card =
+            document.createElement("article");
+
+        card.className =
+            "business-risk-card";
+
+        const top =
+            document.createElement("div");
+
+        top.className =
+            "business-risk-card-top";
+
+        const metricWrapper =
+            document.createElement("div");
+
+        const name =
+            document.createElement("span");
+
+        name.className =
+            "business-risk-name";
+
+        name.textContent =
+            risk.name ||
+            "Business Risk";
+
+        const score =
+            document.createElement("strong");
+
+        score.textContent =
+            formatForecastNumber(
+                risk.score || 0
+            ) + "%";
+
+        metricWrapper.appendChild(name);
+        metricWrapper.appendChild(score);
+
+        const level =
+            document.createElement("span");
+
+        const levelText =
+            risk.level || "Low";
+
+        level.className =
+            "business-risk-level "
+            + levelText.toLowerCase();
+
+        level.textContent =
+            levelText;
+
+        top.appendChild(metricWrapper);
+        top.appendChild(level);
+
+        const progress =
+            document.createElement("div");
+
+        progress.className =
+            "business-risk-progress";
+
+        const progressBar =
+            document.createElement("div");
+
+        progressBar.className =
+            "business-risk-progress-bar";
+
+        progressBar.style.width =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    Number(risk.score || 0)
+                )
+            ) + "%";
+
+        progress.appendChild(
+            progressBar
+        );
+
+        const description =
+            document.createElement("p");
+
+        description.textContent =
+            risk.description ||
+            "No risk description is available.";
+
+        card.appendChild(top);
+        card.appendChild(progress);
+        card.appendChild(description);
+
+        grid.appendChild(card);
+    });
+}
+function updateAIRecommendations(result) {
+    const recommendationResult =
+        result.ai_recommendations || {};
+
+    const recommendations =
+        Array.isArray(
+            recommendationResult.recommendations
+        )
+            ? recommendationResult.recommendations
+            : [];
+
+    const prioritySummary =
+        recommendationResult.priority_summary || {};
+
+    const actionBadge =
+        document.getElementById(
+            "overallActionBadge"
+        );
+
+    if (actionBadge) {
+        const actionLevel =
+            recommendationResult.overall_action_level
+            || "No Action Available";
+
+        actionBadge.textContent =
+            actionLevel;
+
+        actionBadge.className =
+            "recommendation-overall-badge "
+            + actionLevel
+                .toLowerCase()
+                .replaceAll(" ", "-");
+    }
+
+    const totalCount =
+        document.getElementById(
+            "totalRecommendationCount"
+        );
+
+    const highCount =
+        document.getElementById(
+            "highRecommendationCount"
+        );
+
+    const mediumCount =
+        document.getElementById(
+            "mediumRecommendationCount"
+        );
+
+    const lowCount =
+        document.getElementById(
+            "lowRecommendationCount"
+        );
+
+    if (totalCount) {
+        totalCount.textContent =
+            recommendationResult.total_recommendations
+            ?? recommendations.length;
+    }
+
+    if (highCount) {
+        highCount.textContent =
+            prioritySummary.high ?? 0;
+    }
+
+    if (mediumCount) {
+        mediumCount.textContent =
+            prioritySummary.medium ?? 0;
+    }
+
+    if (lowCount) {
+        lowCount.textContent =
+            prioritySummary.low ?? 0;
+    }
+
+    const cardsContainer =
+        document.getElementById(
+            "recommendationCards"
+        );
+
+    if (!cardsContainer) {
+        return;
+    }
+
+    cardsContainer.innerHTML = "";
+
+    if (!recommendations.length) {
+        const emptyMessage =
+            document.createElement("p");
+
+        emptyMessage.className =
+            "recommendation-empty";
+
+        emptyMessage.textContent =
+            "No AI business recommendations are available.";
+
+        cardsContainer.appendChild(
+            emptyMessage
+        );
+
+        return;
+    }
+
+    recommendations.forEach(
+        recommendation => {
+            const card =
+                document.createElement(
+                    "article"
+                );
+
+            card.className =
+                "recommendation-card";
+
+            const header =
+                document.createElement(
+                    "div"
+                );
+
+            header.className =
+                "recommendation-card-header";
+
+            const titleWrapper =
+                document.createElement(
+                    "div"
+                );
+
+            const category =
+                document.createElement(
+                    "span"
+                );
+
+            category.className =
+                "recommendation-category";
+
+            category.textContent =
+                recommendation.category
+                || "Business Action";
+
+            const title =
+                document.createElement(
+                    "h3"
+                );
+
+            title.textContent =
+                recommendation.title
+                || "Recommendation";
+
+            titleWrapper.appendChild(
+                category
+            );
+
+            titleWrapper.appendChild(
+                title
+            );
+
+            const priority =
+                document.createElement(
+                    "span"
+                );
+
+            const priorityText =
+                recommendation.priority
+                || "Low";
+
+            priority.className =
+                "recommendation-priority "
+                + priorityText.toLowerCase();
+
+            priority.textContent =
+                priorityText;
+
+            header.appendChild(
+                titleWrapper
+            );
+
+            header.appendChild(
+                priority
+            );
+
+            const body =
+                document.createElement(
+                    "div"
+                );
+
+            body.className =
+                "recommendation-body";
+
+            const addDetail = (
+                label,
+                value
+            ) => {
+                const detail =
+                    document.createElement(
+                        "div"
+                    );
+
+                detail.className =
+                    "recommendation-detail";
+
+                const detailLabel =
+                    document.createElement(
+                        "span"
+                    );
+
+                detailLabel.textContent =
+                    label;
+
+                const paragraph =
+                    document.createElement(
+                        "p"
+                    );
+
+                paragraph.textContent =
+                    value
+                    || "No information available.";
+
+                detail.appendChild(
+                    detailLabel
+                );
+
+                detail.appendChild(
+                    paragraph
+                );
+
+                body.appendChild(
+                    detail
+                );
+            };
+
+            addDetail(
+                "Recommended Action",
+                recommendation.action
+            );
+
+            addDetail(
+                "Rationale",
+                recommendation.rationale
+            );
+
+            addDetail(
+                "Expected Impact",
+                recommendation.expected_impact
+            );
+
+            const footer =
+                document.createElement(
+                    "div"
+                );
+
+            footer.className =
+                "recommendation-footer";
+
+            const timeline =
+                document.createElement(
+                    "span"
+                );
+
+            timeline.textContent =
+                "📅 "
+                + (
+                    recommendation.timeline
+                    || "No timeline"
+                );
+
+            const confidence =
+                document.createElement(
+                    "span"
+                );
+
+            confidence.textContent =
+                "Confidence: "
+                + formatForecastNumber(
+                    recommendation.confidence
+                    || 0
+                )
+                + "%";
+
+            footer.appendChild(
+                timeline
+            );
+
+            footer.appendChild(
+                confidence
+            );
+
+            card.appendChild(
+                header
+            );
+
+            card.appendChild(
+                body
+            );
+
+            card.appendChild(
+                footer
+            );
+
+            cardsContainer.appendChild(
+                card
+            );
+        }
+    );
+}
+
+function setExecutiveProgressBar(
+    elementId,
+    value
+) {
+    const element =
+        document.getElementById(
+            elementId
+        );
+
+    if (!element) {
+        return;
+    }
+
+    const safeValue =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                Number(value || 0)
+            )
+        );
+
+    element.style.width =
+        safeValue + "%";
+}
+
+
+function renderExecutiveRiskItems(
+    risks
+) {
+    const container =
+        document.getElementById(
+            "executiveTopRisks"
+        );
+
+    if (!container) {
+        return;
+    }
+
+    container.innerHTML = "";
+
+    if (!Array.isArray(risks) || !risks.length) {
+        container.innerHTML =
+            "<p>No major business risks are available.</p>";
+
+        return;
+    }
+
+    risks.forEach(risk => {
+        const item =
+            document.createElement("div");
+
+        item.className =
+            "executive-risk-item";
+
+        const content =
+            document.createElement("div");
+
+        const title =
+            document.createElement("strong");
+
+        title.textContent =
+            risk.name || "Business Risk";
+
+        const description =
+            document.createElement("p");
+
+        description.textContent =
+            risk.description || "";
+
+        content.appendChild(title);
+        content.appendChild(description);
+
+        const badge =
+            document.createElement("span");
+
+        badge.textContent =
+            (risk.level || "Unknown")
+            + " · "
+            + formatForecastNumber(
+                risk.score || 0
+            )
+            + "%";
+
+        item.appendChild(content);
+        item.appendChild(badge);
+
+        container.appendChild(item);
+    });
+}
+
+
+function renderExecutiveRecommendationItems(
+    recommendations
+) {
+    const container =
+        document.getElementById(
+            "executiveTopRecommendations"
+        );
+
+    if (!container) {
+        return;
+    }
+
+    container.innerHTML = "";
+
+    if (
+        !Array.isArray(recommendations)
+        || !recommendations.length
+    ) {
+        container.innerHTML =
+            "<p>No executive recommendations are available.</p>";
+
+        return;
+    }
+
+    recommendations.forEach(
+        recommendation => {
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "executive-recommendation-item";
+
+            const content =
+                document.createElement("div");
+
+            const title =
+                document.createElement("strong");
+
+            title.textContent =
+                recommendation.title
+                || "Recommendation";
+
+            const description =
+                document.createElement("p");
+
+            description.textContent =
+                recommendation.action || "";
+
+            content.appendChild(title);
+            content.appendChild(description);
+
+            const badge =
+                document.createElement("span");
+
+            badge.textContent =
+                recommendation.priority
+                || "Low";
+
+            item.appendChild(content);
+            item.appendChild(badge);
+
+            container.appendChild(item);
+        }
+    );
+}
+
+
+function updateExecutiveDecisionSummary(result) {
+    const executiveSummary =
+        result.executive_summary || {};
+
+    const kpis =
+        executiveSummary.kpis || {};
+
+    const setText = (
+        elementId,
+        value,
+        fallback = "-"
+    ) => {
+        const element =
+            document.getElementById(
+                elementId
+            );
+
+        if (element) {
+            element.textContent =
+                value ?? fallback;
+        }
+    };
+
+    const headline =
+        executiveSummary.headline
+        || "Monitor and Maintain";
+
+    const badge =
+        document.getElementById(
+            "executiveDecisionBadge"
+        );
+
+    if (badge) {
+        badge.textContent =
+            headline;
+
+        badge.className =
+            "executive-decision-badge "
+            + headline
+                .toLowerCase()
+                .replaceAll(" ", "-");
+    }
+
+    setText(
+        "executiveDecisionConfidence",
+        formatForecastNumber(
+            kpis.decision_confidence || 0
+        ) + "%"
+    );
+
+    setText(
+        "executiveBusinessHealth",
+        formatForecastNumber(
+            kpis.business_health_score || 0
+        ) + "%"
+    );
+
+    setText(
+        "executiveForecastReliability",
+        formatForecastNumber(
+            kpis.forecast_reliability || 0
+        ) + "%"
+    );
+
+    setText(
+        "executiveAIReadiness",
+        formatForecastNumber(
+            kpis.ai_readiness || 0
+        ) + "%"
+    );
+
+    setExecutiveProgressBar(
+        "decisionConfidenceBar",
+        kpis.decision_confidence
+    );
+
+    setExecutiveProgressBar(
+        "businessHealthBar",
+        kpis.business_health_score
+    );
+
+    setExecutiveProgressBar(
+        "forecastReliabilityBar",
+        kpis.forecast_reliability
+    );
+
+    setExecutiveProgressBar(
+        "aiReadinessBar",
+        kpis.ai_readiness
+    );
+
+    setText(
+        "executiveOverview",
+        executiveSummary.overview,
+        "No executive overview is available."
+    );
+
+    setText(
+        "executiveForecastOutlook",
+        executiveSummary.forecast_outlook,
+        "No forecast outlook is available."
+    );
+
+    setText(
+        "executiveStrategicConclusion",
+        executiveSummary.strategic_conclusion,
+        "No strategic conclusion is available."
+    );
+
+    renderExecutiveRiskItems(
+        executiveSummary.top_risks
+    );
+
+    renderExecutiveRecommendationItems(
+        executiveSummary.top_recommendations
+    );
+
+    const copyText =
+        document.getElementById(
+            "executiveCopyText"
+        );
+
+    if (copyText) {
+        copyText.value =
+            executiveSummary.copyable_brief
+            || "";
+    }
+}
+
+
+const copyExecutiveBriefButton =
+    document.getElementById(
+        "copyExecutiveBriefButton"
+    );
+
+
+if (copyExecutiveBriefButton) {
+    copyExecutiveBriefButton.addEventListener(
+        "click",
+        async function () {
+            const copyText =
+                document.getElementById(
+                    "executiveCopyText"
+                );
+
+            const copyMessage =
+                document.getElementById(
+                    "executiveCopyMessage"
+                );
+
+            if (!copyText || !copyText.value) {
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(
+                    copyText.value
+                );
+
+                copyExecutiveBriefButton.textContent =
+                    "Copied";
+
+                if (copyMessage) {
+                    copyMessage.style.display =
+                        "block";
+                }
+
+                setTimeout(() => {
+                    copyExecutiveBriefButton.textContent =
+                        "Copy Executive Brief";
+
+                    if (copyMessage) {
+                        copyMessage.style.display =
+                            "none";
+                    }
+                }, 2200);
+
+            } catch (error) {
+                copyText.style.display =
+                    "block";
+
+                copyText.select();
+
+                document.execCommand(
+                    "copy"
+                );
+
+                copyText.style.display =
+                    "none";
+            }
+        }
+    );
+}
+
+function renderForecastResult(result) {
+    forecastResults.style.display = "block";
+
+    latestForecastResult = result;
+
+    updateForecastKpis(result);
+    updateEnterpriseForecastHealth(result);
+    updateModelIntelligence(result);
+    updateModelLeaderboard(result);
+
+renderModelComparisonChart(
+    result,
+    "validation_score"
+);
+
+renderForecastChart(result);
+updateExplainableAI(result);
+    updateForecastTable(result);
+    updateForecastRisks(result);
+    updateBusinessRiskDashboard(result);
+    updateAIRecommendations(result);
+    updateExecutiveDecisionSummary(result);
+    updateForecastRecommendations(result);
+
+    forecastResults.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+}
+
+
+if (
+    initialForecast
+    && initialForecast.success
+) {
+    renderForecastResult(initialForecast);
+}
+
+
+forecastForm.addEventListener(
+    "submit",
+    async function (event) {
+        event.preventDefault();
+
+        forecastError.style.display = "none";
+        forecastError.textContent = "";
+
+        generateForecastButton.disabled = true;
+        generateForecastButton.textContent =
+            "Generating Forecast...";
+
+        try {
+            const response = await fetch(
+                "{{ url_for('forecasting.generate_forecast_api', filename=filename) }}",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        date_column:
+                            dateColumn.value,
+
+                        value_column:
+                            valueColumn.value,
+
+                        periods:
+                            parseInt(
+                                forecastPeriods.value,
+                                10
+                            )
+                    })
+                }
+            );
+
+            const result =
+                await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(
+                    result.message
+                    || "Forecast generation failed."
+                );
+            }
+
+            renderForecastResult(result);
+
+        } catch (error) {
+            forecastError.textContent =
+                error.message;
+
+            forecastError.style.display =
+                "block";
+
+            console.error(
+                "Forecast request failed:",
+                error
+            );
+
+        } finally {
+            generateForecastButton.disabled =
+                false;
+
+            generateForecastButton.textContent =
+                "Generate Forecast";
+        }
+    }
+);
+</script>
+<!-- ================= SAVE DASHBOARD MODAL ================= -->
+<div
+    id="saveDashboardModal"
+    class="save-dashboard-modal"
+    aria-hidden="true"
+>
+
+    <div class="save-dashboard-backdrop"></div>
+
+    <section class="save-dashboard-modal-card">
+
+        <div class="save-dashboard-modal-header">
+
+            <div>
+
+                <span class="copilot-label">
+                    Workspace
+                </span>
+
+                <h2>
+                    Save Dashboard
+                </h2>
+
+                <p>
+                    Save this dashboard inside one of your workspaces.
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                id="closeSaveDashboardButton"
+                class="save-dashboard-close-btn"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <div
+            id="saveDashboardMessage"
+            class="save-dashboard-message"
+            style="display:none;"
+        ></div>
+
+        <form id="saveDashboardForm">
+
+            <div class="save-dashboard-field">
+
+                <label for="saveDashboardWorkspace">
+                    Workspace
+                </label>
+
+                <select
+                    id="saveDashboardWorkspace"
+                    required
+                >
+                    <option value="">
+                        Loading workspaces...
+                    </option>
+                </select>
+
+            </div>
+
+            <div class="save-dashboard-field">
+
+                <label for="saveDashboardName">
+                    Dashboard Name
+                </label>
+
+                <input
+                    type="text"
+                    id="saveDashboardName"
+                    maxlength="100"
+                    required
+                >
+
+            </div>
+
+            <div class="save-dashboard-field">
+
+                <label for="saveDashboardDescription">
+                    Description
+                </label>
+
+                <textarea
+                    id="saveDashboardDescription"
+                    rows="4"
+                    maxlength="300"
+                    placeholder="Optional description..."
+                ></textarea>
+
+            </div>
+
+            <div class="save-dashboard-modal-actions">
+
+                <button
+                    type="button"
+                    id="cancelSaveDashboardButton"
+                    class="save-dashboard-secondary-btn"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    id="submitSaveDashboardButton"
+                    class="save-dashboard-primary-btn"
+                >
+                    Save Dashboard
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+<script>
+window.dashboardSaveConfig = {
+
+    filename:
+        {{ filename | tojson }},
+
+    dashboardType:
+        "forecast",
+
+    defaultName:
+        "Forecast Dashboard - {{ filename }}"
+
+};
+</script>
+
+<script
+    src="{{ url_for('static', filename='dashboard_save.js') }}"
+></script>
+
+<script>
+window.dashboardSaveConfig = {
+
+    filename:
+        {{ filename | tojson }},
+
+    dashboardType:
+        "forecast",
+
+    defaultName:
+        "Forecast Dashboard - {{ filename }}"
+};
+</script>
+
+<script
+src="{{ url_for('static',
+filename='dashboard_save.js') }}">
+</script>
+</body>
+</html>

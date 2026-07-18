@@ -1,0 +1,364 @@
+
+.ai-sql-main {
+    padding-bottom: 60px;
+}
+
+.ai-sql-hero {
+    margin-bottom: 24px;
+    padding: 30px;
+    border-radius: 24px;
+    color: #ffffff;
+    background:
+        linear-gradient(
+            135deg,
+            #0f172a,
+            #1d4ed8 58%,
+            #4f46e5
+        );
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    box-shadow:
+        0 22px 55px rgba(37, 99, 235, 0.22);
+}
+
+.ai-sql-label {
+    display: inline-block;
+    margin-bottom: 7px;
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.ai-sql-hero .ai-sql-label {
+    color: #bfdbfe;
+}
+
+.ai-sql-hero h1 {
+    margin: 0;
+    font-size: clamp(32px, 4vw, 48px);
+}
+
+.ai-sql-hero p {
+    margin: 10px 0 0;
+    color: #dbeafe;
+}
+
+.ai-sql-hero-meta {
+    display: grid;
+    grid-template-columns:
+        repeat(2, minmax(130px, 1fr));
+    gap: 12px;
+}
+
+.ai-sql-hero-meta > div {
+    padding: 15px 17px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.ai-sql-hero-meta span {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.ai-sql-hero-meta strong {
+    font-size: 18px;
+}
+
+.ai-sql-layout {
+    display: grid;
+    grid-template-columns:
+        minmax(250px, 0.32fr)
+        minmax(0, 1fr);
+    gap: 22px;
+    align-items: start;
+}
+
+.ai-sql-schema-panel,
+.ai-sql-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 21px;
+    background: #ffffff;
+    box-shadow:
+        0 14px 34px rgba(15, 23, 42, 0.06);
+}
+
+.ai-sql-schema-panel {
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 40px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.ai-sql-panel-heading,
+.ai-sql-card {
+    padding: 22px;
+}
+
+.ai-sql-panel-heading {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.ai-sql-panel-heading h2,
+.ai-sql-card h2 {
+    margin: 0;
+    color: #0f172a;
+}
+
+.ai-sql-panel-heading p {
+    margin: 7px 0 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.ai-sql-schema-list {
+    padding: 12px;
+    overflow-y: auto;
+}
+
+.ai-sql-schema-item {
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 11px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 11px;
+    color: #334155;
+    background: #f8fafc;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.ai-sql-schema-item:hover {
+    color: #1d4ed8;
+    border-color: #93c5fd;
+    background: #eff6ff;
+}
+
+.ai-sql-schema-item small {
+    color: #64748b;
+}
+
+.ai-sql-workspace {
+    min-width: 0;
+    display: grid;
+    gap: 20px;
+}
+
+.ai-sql-card-header {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.ai-sql-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.ai-sql-card textarea {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 13px;
+    color: #0f172a;
+    background: #ffffff;
+    font: inherit;
+    resize: vertical;
+}
+
+#aiSqlEditor {
+    color: #dbeafe;
+    background: #0f172a;
+    border-color: #1e293b;
+    font-family:
+        "Cascadia Code",
+        Consolas,
+        monospace;
+    line-height: 1.65;
+}
+
+.ai-sql-card textarea:focus {
+    outline: 0;
+    border-color: #2563eb;
+    box-shadow:
+        0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.ai-sql-example-row {
+    margin: 12px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.ai-sql-example-row button,
+.ai-sql-secondary-button {
+    border: 1px solid #dbeafe;
+    border-radius: 999px;
+    padding: 9px 12px;
+    color: #1d4ed8;
+    background: #eff6ff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ai-sql-example-row button:hover,
+.ai-sql-secondary-button:hover {
+    color: #ffffff;
+    background: #2563eb;
+}
+
+.ai-sql-primary-button {
+    width: 100%;
+    border: 0;
+    border-radius: 13px;
+    padding: 14px 18px;
+    color: #ffffff;
+    background:
+        linear-gradient(
+            135deg,
+            #2563eb,
+            #4f46e5
+        );
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.ai-sql-primary-button:disabled,
+.ai-sql-secondary-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.ai-sql-security-note {
+    margin: 11px 0 0;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.ai-sql-status {
+    padding: 14px 16px;
+    border-radius: 13px;
+    color: #1e40af;
+    background: #dbeafe;
+    font-weight: 700;
+}
+
+.ai-sql-status.error {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+.ai-sql-chart {
+    width: 100%;
+    height: 390px;
+    margin-bottom: 18px;
+}
+
+.ai-sql-table-wrapper {
+    max-height: 500px;
+    overflow: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+}
+
+#aiSqlResultTable {
+    width: 100%;
+    min-width: 700px;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+#aiSqlResultTable th,
+#aiSqlResultTable td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+    white-space: nowrap;
+}
+
+#aiSqlResultTable th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    color: #ffffff;
+    background: #0f172a;
+}
+
+#aiSqlResultTable tr:nth-child(even) td {
+    background: #f8fafc;
+}
+
+.ai-sql-history {
+    display: grid;
+    gap: 10px;
+}
+
+.ai-sql-history-item {
+    padding: 13px;
+    border: 1px solid #e2e8f0;
+    border-radius: 13px;
+    background: #f8fafc;
+    cursor: pointer;
+}
+
+.ai-sql-history-item:hover {
+    border-color: #93c5fd;
+    background: #eff6ff;
+}
+
+.ai-sql-history-item strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #0f172a;
+}
+
+.ai-sql-history-item code {
+    color: #334155;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.ai-sql-empty-state {
+    margin: 0;
+    color: #64748b;
+}
+
+@media (max-width: 1050px) {
+    .ai-sql-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .ai-sql-schema-panel {
+        position: static;
+        max-height: 430px;
+    }
+}
+
+@media (max-width: 720px) {
+    .ai-sql-hero,
+    .ai-sql-card-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .ai-sql-hero-meta {
+        width: 100%;
+        grid-template-columns: 1fr;
+    }
+}

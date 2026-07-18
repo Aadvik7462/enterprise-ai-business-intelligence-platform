@@ -1,0 +1,153 @@
+<div
+    id="commandPalette"
+    class="command-palette"
+    aria-hidden="true"
+>
+    <div class="command-palette-backdrop"></div>
+
+    <section class="command-palette-card">
+        <div class="command-palette-search">
+            <span>⌕</span>
+
+            <input
+                type="search"
+                id="commandPaletteInput"
+                placeholder="Search pages and commands..."
+                autocomplete="off"
+            >
+
+            <kbd>Esc</kbd>
+        </div>
+
+        <div
+            id="commandPaletteResults"
+            class="command-palette-results"
+        >
+            <a href="{{ url_for('dashboard.dashboard') }}" data-command-item>
+                <span>🏠</span>
+                <div>
+                    <strong>Dashboard</strong>
+                    <small>Open main dashboard</small>
+                </div>
+            </a>
+
+            <a href="{{ url_for('dashboard.dashboard') }}#upload-section" data-command-item>
+                <span>📤</span>
+                <div>
+                    <strong>Upload Dataset</strong>
+                    <small>Start a new analysis</small>
+                </div>
+            </a>
+
+            {% if filename %}
+                <a
+                    href="{{ url_for('analytics.analytics_dashboard', filename=filename) }}"
+                    data-command-item
+                >
+                    <span>📊</span>
+                    <div>
+                        <strong>Analytics</strong>
+                        <small>Open automatic analytics</small>
+                    </div>
+                </a>
+
+                <a
+                    href="{{ url_for('executive.executive_dashboard', filename=filename) }}"
+                    data-command-item
+                >
+                    <span>📈</span>
+                    <div>
+                        <strong>Executive Dashboard</strong>
+                        <small>Open executive intelligence</small>
+                    </div>
+                </a>
+
+                <a
+                    href="{{ url_for('forecasting.forecast_page', filename=filename) }}"
+                    data-command-item
+                >
+                    <span>🔮</span>
+                    <div>
+                        <strong>Forecasting</strong>
+                        <small>Open AI Forecast Studio</small>
+                    </div>
+                </a>
+
+                <a
+                    href="{{ url_for('enterprise_ai_page.enterprise_ai_page', filename=filename) }}"
+                    data-command-item
+                >
+                    <span>🧠</span>
+                    <div>
+                        <strong>Enterprise AI</strong>
+                        <small>Open scenario and goal center</small>
+                    </div>
+                </a>
+            {% endif %}
+
+            <a
+                href="{{ url_for('workspace_page.workspace_page') }}"
+                data-command-item
+            >
+                <span>🗂️</span>
+                <div>
+                    <strong>Workspaces</strong>
+                    <small>Manage saved dashboards</small>
+                </div>
+            </a>
+
+            <a
+                href="{{ url_for('collaboration_page.collaboration_center') }}"
+                data-command-item
+            >
+                <span>👥</span>
+                <div>
+                    <strong>Collaboration</strong>
+                    <small>Open invitations and activity</small>
+                </div>
+            </a>
+        </div>
+
+        <div
+            id="commandPaletteEmpty"
+            class="command-palette-empty"
+            style="display: none;"
+        >
+            No matching commands.
+        </div>
+    </section>
+</div>
+
+<aside
+    id="notificationPanel"
+    class="notification-panel"
+    aria-hidden="true"
+>
+    <div class="notification-panel-header">
+        <div>
+            <span>Updates</span>
+            <h2>Notifications</h2>
+        </div>
+
+        <button
+            type="button"
+            id="closeNotificationPanelButton"
+        >
+            ×
+        </button>
+    </div>
+
+    <div
+        id="notificationPanelContent"
+        class="notification-panel-content"
+    >
+        <div class="notification-panel-loading">
+            Loading notifications...
+        </div>
+    </div>
+</aside>
+
+<div
+    id="globalToastContainer"
+    class="global-toast-container"
+></div>

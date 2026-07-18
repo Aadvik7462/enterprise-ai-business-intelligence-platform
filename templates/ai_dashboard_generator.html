@@ -1,0 +1,15 @@
+
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>AI Dashboard Generator</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='ui_system.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='phase4_enterprise.css') }}">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body><div class="dashboard-layout">{% set active_page = "enterprise_ai" %}{% include "sidebar.html" %}
+<main class="main-content phase4-main">
+<section class="phase4-hero compact"><div><span class="phase4-label">Phase 4.1</span><h1>AI Dashboard Generator</h1><p>Automatically generated from <strong>{{ filename }}</strong>.</p></div></section>
+<section class="phase4-kpi-grid">{% for kpi in kpis %}<article class="phase4-kpi"><span>{{ kpi.title }}</span><strong>{{ kpi.value }}</strong><small>{{ kpi.subtitle }}</small></article>{% endfor %}</section>
+<section class="phase4-chart-grid">{% for chart in charts %}<article class="phase4-card"><h2>{{ chart.title }}</h2><div id="phase4Chart{{ loop.index }}" class="phase4-chart"></div></article>{% endfor %}</section>
+<section class="phase4-card"><h2>Generated Insights</h2><div class="phase4-insight-list">{% for insight in insights %}<article class="phase4-insight {{ insight.severity }}"><strong>{{ insight.title }}</strong><p>{{ insight.message }}</p></article>{% endfor %}</div></section>
+</main></div>
+<script>window.phase4Charts={{ charts | tojson }};</script><script src="{{ url_for('static', filename='phase4_enterprise.js') }}"></script></body></html>

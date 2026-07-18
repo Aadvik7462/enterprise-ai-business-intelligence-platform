@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Collaboration Center | AI BI Platform
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='collaboration.css') }}"
+    >
+</head>
+
+<body>
+
+<div class="collaboration-shell">
+
+    <aside class="collaboration-sidebar">
+
+        <div class="collaboration-brand">
+            <div>AI</div>
+
+            <span>
+                <strong>AI BI</strong>
+                <small>Business Intelligence</small>
+            </span>
+        </div>
+
+        <nav>
+            <a href="{{ url_for('dashboard.dashboard') }}">
+                🏠 Dashboard
+            </a>
+
+            <a href="{{ url_for('workspace_page.workspace_page') }}">
+                🗂️ Workspaces
+            </a>
+
+            <a
+                href="{{ url_for('collaboration_page.collaboration_center') }}"
+                class="active"
+            >
+                👥 Collaboration
+            </a>
+
+            <a href="{{ url_for('auth.logout') }}">
+                ↩ Logout
+            </a>
+        </nav>
+
+    </aside>
+
+    <main class="collaboration-main">
+
+        <header class="collaboration-header">
+            <div>
+                <p>Enterprise Collaboration</p>
+                <h1>Collaboration Center</h1>
+
+                <span>
+                    Manage invitations, notifications,
+                    shared activity, and audit history.
+                </span>
+            </div>
+        </header>
+
+        <section class="collaboration-grid">
+
+            <article class="collaboration-card">
+
+                <div class="collaboration-card-header">
+                    <div>
+                        <p>Pending</p>
+                        <h2>Workspace Invitations</h2>
+                    </div>
+
+                    <strong>
+                        {{ invitations | length }}
+                    </strong>
+                </div>
+
+                <div id="invitationList">
+
+                    {% for invitation in invitations %}
+
+                        <div
+                            class="collaboration-list-item"
+                            data-invitation-id="{{ invitation.id }}"
+                        >
+                            <div>
+                                <strong>
+                                    {{ invitation.workspace_name }}
+                                </strong>
+
+                                <span>
+                                    Role:
+                                    {{ invitation.role | title }}
+                                </span>
+
+                                <small>
+                                    Invited by
+                                    {{ invitation.invited_by }}
+                                </small>
+                            </div>
+
+                            <div class="collaboration-actions">
+                                <button
+                                    type="button"
+                                    data-invitation-action="accept"
+                                    data-invitation-id="{{ invitation.id }}"
+                                >
+                                    Accept
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="secondary"
+                                    data-invitation-action="reject"
+                                    data-invitation-id="{{ invitation.id }}"
+                                >
+                                    Reject
+                                </button>
+                            </div>
+                        </div>
+
+                    {% else %}
+
+                        <div class="collaboration-empty">
+                            No pending invitations.
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </article>
+
+            <article class="collaboration-card">
+
+                <div class="collaboration-card-header">
+                    <div>
+                        <p>Updates</p>
+                        <h2>Notifications</h2>
+                    </div>
+
+                    <strong>
+                        {{ notifications | length }}
+                    </strong>
+                </div>
+
+                <div id="notificationList">
+
+                    {% for notification in notifications %}
+
+                        <button
+                            type="button"
+                            class="notification-item
+                            {% if not notification.is_read %}unread{% endif %}"
+                            data-notification-id="{{ notification.id }}"
+                        >
+                            <strong>
+                                {{ notification.title }}
+                            </strong>
+
+                            <span>
+                                {{ notification.message }}
+                            </span>
+
+                            <small>
+                                {{ notification.created_at }}
+                            </small>
+                        </button>
+
+                    {% else %}
+
+                        <div class="collaboration-empty">
+                            No notifications.
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </article>
+
+        </section>
+
+        <section class="collaboration-card audit-card">
+
+            <div class="collaboration-card-header">
+                <div>
+                    <p>Governance</p>
+                    <h2>Audit Activity</h2>
+                </div>
+
+                <strong>
+                    {{ audit_logs | length }}
+                </strong>
+            </div>
+
+            <div class="audit-table-wrapper">
+
+                <table class="audit-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Entity</th>
+                            <th>Details</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for log in audit_logs %}
+
+                            <tr>
+                                <td>{{ log.user_id }}</td>
+                                <td>{{ log.action }}</td>
+                                <td>
+                                    {{ log.entity_type }}
+                                    {% if log.entity_id %}
+                                        #{{ log.entity_id }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ log.details }}</td>
+                                <td>{{ log.created_at }}</td>
+                            </tr>
+
+                        {% else %}
+
+                            <tr>
+                                <td colspan="5">
+                                    No activity recorded yet.
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script
+    src="{{ url_for('static', filename='collaboration.js') }}"
+></script>
+
+</body>
+</html>
