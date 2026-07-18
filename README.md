@@ -158,7 +158,7 @@ Unlike traditional dashboard applications, this platform combines **Business Int
 
 <p align="center">
 
-<img src="screenshots/ML Studio.png" width="95%">
+<img src="./screenshots/ML%20Studio.png" width="95%">
 
 </p>
 
